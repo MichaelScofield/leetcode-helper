@@ -3,51 +3,38 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn search_range(nums: Vec<i32>, target: i32) -> Vec<i32> {
-        let len = nums.len();
-        if len == 0 {
-            return vec![-1, -1];
+    pub fn combination_sum(candidates: Vec<i32>, target: i32) -> Vec<Vec<i32>> {
+        if candidates.len() < 1 {
+            return Vec::with_capacity(0);
         }
-        let mut i = 0;
-        let mut j = len;
-        let mut range = vec![-1, -1];
-        while i < j {
-            let mid = i + (j - i) / 2;
-            if nums[mid] < target {
-                i = mid + 1;
-            } else if nums[mid] > target {
-                j = mid;
-            } else {
-                let mut p = mid;
-                while p > 0 {
-                    if nums[p - 1] != target {
-                        break;
-                    }
-                    p -= 1;
+        use std::collections::HashSet;
+        fn combination_sum(candidates: &Vec<i32>, target: i32,
+                           result: Vec<i32>, results: &mut HashSet<Vec<i32>>) {
+            for &candidate in candidates.iter() {
+                if target < candidate {
+                    continue;
                 }
-                range[0] = p as i32;
-
-                let mut q = mid;
-                while q < len - 1 {
-                    if nums[q + 1] != target {
-                        break;
-                    }
-                    q += 1;
+                let mut result = result.clone();
+                result.push(candidate);
+                if target == candidate {
+                    result.sort();
+                    results.insert(result);
+                } else {
+                    combination_sum(&candidates, target - candidate, result, results);
                 }
-                range[1] = q as i32;
-                break;
             }
         }
-        range
+        let mut results = HashSet::new();
+        let result = vec![];
+        combination_sum(&candidates, target, result, &mut results);
+        results.into_iter().collect()
     }
 }
 
 fn main() {
-    assert_eq!(vec![3, 4], Solution::search_range(vec![5, 7, 7, 8, 8, 10], 8));
-    assert_eq!(vec![-1, -1], Solution::search_range(vec![5, 7, 7, 8, 8, 10], 6));
-    assert_eq!(vec![-1, -1], Solution::search_range(vec![], 6));
-    assert_eq!(vec![-1, -1], Solution::search_range(vec![1], 0));
-    assert_eq!(vec![0, 0], Solution::search_range(vec![1], 1));
-    assert_eq!(vec![0, 1], Solution::search_range(vec![1, 1], 1));
-    assert_eq!(vec![0, 2], Solution::search_range(vec![1, 1, 1], 1));
+    println!("{:?}", Solution::combination_sum(vec![2, 3, 6, 7], 7));
+    println!("{:?}", Solution::combination_sum(vec![2, 3, 5], 8));
+    println!("{:?}", Solution::combination_sum(vec![2, 3, 5], 1));
+    println!("{:?}", Solution::combination_sum(vec![2, 3, 5], 2));
+    println!("{:?}", Solution::combination_sum(vec![2, 3, 5], 5));
 }
