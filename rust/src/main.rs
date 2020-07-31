@@ -3,35 +3,36 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn merge(intervals: Vec<Vec<i32>>) -> Vec<Vec<i32>> {
-        let len = intervals.len();
-        if len == 0 {
-            return Vec::with_capacity(0);
-        }
-        let intervals = &mut { intervals };
-        intervals.sort_by(|a, b| a[0].cmp(&b[0]));
-        let mut merged = vec![];
-        let mut last_merge = vec![intervals[0][0], intervals[0][1]];
-        for i in 1..len {
-            let interval = &intervals[i];
-            if interval[0] <= last_merge[1] {
-                last_merge = vec![last_merge[0], std::cmp::max(last_merge[1], interval[1])];
-            } else {
-                merged.push(last_merge);
-                last_merge = vec![interval[0], interval[1]];
+    pub fn unique_paths(m: i32, n: i32) -> i32 {
+        let mut paths = vec![vec![0; m as usize]; n as usize];
+        paths[0][0] = 1;
+        fn calc_paths(m: i32, n: i32, paths: &mut Vec<Vec<i32>>) -> i32 {
+            let y = n as usize - 1;
+            let x = m as usize - 1;
+            if paths[y][x] == 0 {
+                paths[y][x] =
+                    if m > 1 {
+                        calc_paths(m - 1, n, paths)
+                    } else {
+                        0
+                    } +
+                    if n > 1 {
+                        calc_paths(m, n - 1, paths)
+                    } else {
+                        0
+                    }
             }
+            paths[y][x]
         }
-        merged.push(last_merge);
-        merged
+        calc_paths(m, n, &mut paths)
     }
 }
 
 fn main() {
-    println!("{:?}", Solution::merge(vec![vec![1, 3], vec![2, 6], vec![8, 10], vec![15, 18]]));
-    println!("{:?}", Solution::merge(vec![vec![1, 4], vec![4, 5]]));
-    println!("{:?}", Solution::merge(vec![vec![4, 5], vec![1, 4]]));
-    println!("{:?}", Solution::merge(vec![vec![1, 4], vec![5, 6]]));
-    println!("{:?}", Solution::merge(vec![vec![5, 6], vec![1, 4]]));
-    println!("{:?}", Solution::merge(vec![vec![1, 6], vec![1, 4], vec![2, 5]]));
-    println!("{:?}", Solution::merge(vec![vec![1, 6]]));
+    assert_eq!(3, Solution::unique_paths(3, 2));
+    assert_eq!(28, Solution::unique_paths(7, 3));
+    assert_eq!(1, Solution::unique_paths(1, 1));
+    assert_eq!(1, Solution::unique_paths(1, 2));
+    assert_eq!(1, Solution::unique_paths(2, 1));
+    assert_eq!(2, Solution::unique_paths(2, 2));
 }
