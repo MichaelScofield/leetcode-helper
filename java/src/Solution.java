@@ -1,49 +1,39 @@
 import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class Solution {
 
-    public ListNode mergeKLists(ListNode[] lists) {
-        ListNode head = null;
-        ListNode curr = null;
-        List<ListNode> ps = Arrays.stream(lists).filter(Objects::nonNull).collect(Collectors.toList());
-        while (!ps.isEmpty()) {
-            int minVal = Integer.MAX_VALUE;
-            int minListIndex = -1;
-            for (int i = 0; i < ps.size(); i++) {
-                ListNode p = ps.get(i);
-                if (p.val <= minVal) {
-                    minVal = p.val;
-                    minListIndex = i;
-                }
+    public int findDuplicate(int[] nums) {
+        if (nums == null) {
+            return -1;
+        }
+        int i = 1, j = nums.length - 1;
+        while (i != j) {
+            int mid = i + (j - i) / 2;
+            int c = countNumsInRange(nums, i, mid);
+            if (i == mid && c > 1) {
+                break;
             }
-            ListNode node = new ListNode(minVal);
-            if (head == null) {
-                head = curr = node;
+            if (c > mid - i + 1) {
+                j = mid;
             } else {
-                curr.next = node;
-                curr = node;
-            }
-            ListNode pNext = ps.get(minListIndex).next;
-            if (pNext == null) {
-                ps.remove(minListIndex);
-            } else {
-                ps.set(minListIndex, pNext);
+                assert c == mid - i + 1;
+                i = mid + 1;
             }
         }
-        return head;
+        return i;
+    }
+
+    private int countNumsInRange(int[] nums, int i, int j) {
+        return (int) Arrays.stream(nums).filter(n -> n >= i && n <= j).count();
     }
 
     public static void main(String[] args) {
-        ListNode l1 = ListNode.from(new int[]{1, 4, 5});
-        ListNode l2 = ListNode.from(new int[]{1, 3, 4});
-        ListNode l3 = ListNode.from(new int[]{2, 6});
         Solution solution = new Solution();
-        ListNode merged = solution.mergeKLists(new ListNode[]{l1, l2, l3});
-        ListNode.printList(merged);
-        System.out.println(ListNode.isEqual(
-                ListNode.from(new int[]{1, 1, 2, 3, 4, 4, 5, 6}), merged));
+        int[] nums = new int[]{1, 3, 4, 2, 2};
+        int duplicate = solution.findDuplicate(nums);
+        System.out.println(duplicate == 2);
+        nums = new int[]{3, 1, 3, 4, 2};
+        duplicate = solution.findDuplicate(nums);
+        System.out.println(duplicate == 3);
     }
 }
