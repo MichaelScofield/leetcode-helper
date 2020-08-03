@@ -3,36 +3,51 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn unique_paths(m: i32, n: i32) -> i32 {
-        let mut paths = vec![vec![0; m as usize]; n as usize];
-        paths[0][0] = 1;
-        fn calc_paths(m: i32, n: i32, paths: &mut Vec<Vec<i32>>) -> i32 {
-            let y = n as usize - 1;
-            let x = m as usize - 1;
-            if paths[y][x] == 0 {
-                paths[y][x] =
-                    if m > 1 {
-                        calc_paths(m - 1, n, paths)
-                    } else {
-                        0
-                    } +
-                    if n > 1 {
-                        calc_paths(m, n - 1, paths)
-                    } else {
-                        0
-                    }
-            }
-            paths[y][x]
+    pub fn sort_colors(nums: &mut Vec<i32>) {
+        if nums.len() <= 1 {
+            return;
         }
-        calc_paths(m, n, &mut paths)
+        let mut i = 0;
+        let mut j = nums.len() - 1;
+        let mut p = 0;
+        while p <= j {
+            if nums[p] == 0 {
+                nums.swap(i, p);
+                i += 1;
+                p += 1;
+            } else if nums[p] == 2 {
+                nums.swap(j, p);
+                if j == 0 {
+                    return;
+                } else {
+                    j -= 1;
+                }
+            } else {
+                p += 1;
+            }
+        }
     }
 }
 
 fn main() {
-    assert_eq!(3, Solution::unique_paths(3, 2));
-    assert_eq!(28, Solution::unique_paths(7, 3));
-    assert_eq!(1, Solution::unique_paths(1, 1));
-    assert_eq!(1, Solution::unique_paths(1, 2));
-    assert_eq!(1, Solution::unique_paths(2, 1));
-    assert_eq!(2, Solution::unique_paths(2, 2));
+    let mut tests = vec![
+        vec![2, 0, 2, 1, 1, 0],
+        vec![1, 1, 1, 1, 1, 1],
+        vec![0, 0, 0, 0],
+        vec![2, 2, 2, 2],
+        vec![2, 0, 1],
+        vec![1, 2, 0],
+        vec![0, 1, 2],
+        vec![0, 2, 1],
+        vec![1, 0],
+        vec![2, 0],
+        vec![0, 1],
+        vec![0, 2],
+        vec![2],
+        vec![1],
+        vec![0]];
+    for test in tests.iter_mut() {
+        Solution::sort_colors(test);
+        println!("{:?}", test);
+    }
 }
