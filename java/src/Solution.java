@@ -1,11 +1,8 @@
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 
 public class Solution {
 
-    public List<List<Integer>> levelOrder(TreeNode root) {
+    public List<List<Integer>> zigzagLevelOrder(TreeNode root) {
         List<List<Integer>> levels = new ArrayList<>();
         if (root == null) {
             return levels;
@@ -13,9 +10,10 @@ public class Solution {
         Queue<TreeNode> queue = new LinkedList<>();
         queue.add(root);
         int currChildren = 1;
+        boolean isZig = true;
         while (!queue.isEmpty()) {
             int nextChildren = 0;
-            List<Integer> level = new ArrayList<>();
+            List<Integer> level = new ArrayList<>(currChildren);
             for (int i = 0; i < currChildren; i++) {
                 TreeNode node = queue.poll();
                 assert node != null;
@@ -30,6 +28,12 @@ public class Solution {
                 }
             }
             currChildren = nextChildren;
+            if (!isZig) {
+                Collections.reverse(level);
+                isZig = true;
+            } else {
+                isZig = false;
+            }
             levels.add(level);
         }
         return levels;
@@ -43,17 +47,17 @@ public class Solution {
 
         vals = new Integer[]{3, 9, 20, null, null, 15, 7};
         root = TreeNode.createTree(vals);
-        levelOrder = solution.levelOrder(root);
+        levelOrder = solution.zigzagLevelOrder(root);
         System.out.println(levelOrder);
 
         vals = new Integer[]{3, 5, null};
         root = TreeNode.createTree(vals);
-        levelOrder = solution.levelOrder(root);
+        levelOrder = solution.zigzagLevelOrder(root);
         System.out.println(levelOrder);
 
         vals = new Integer[]{1, null, 2, null, 3, null, 4};
         root = TreeNode.createTree(vals);
-        levelOrder = solution.levelOrder(root);
+        levelOrder = solution.zigzagLevelOrder(root);
         System.out.println(levelOrder);
     }
 }
