@@ -1,63 +1,74 @@
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 
 public class Solution {
 
-    public List<List<Integer>> zigzagLevelOrder(TreeNode root) {
-        List<List<Integer>> levels = new ArrayList<>();
+    public boolean isValidBST(TreeNode root) {
         if (root == null) {
-            return levels;
+            return true;
         }
-        Queue<TreeNode> queue = new LinkedList<>();
-        queue.add(root);
-        int currChildren = 1;
-        boolean isZig = true;
-        while (!queue.isEmpty()) {
-            int nextChildren = 0;
-            List<Integer> level = new ArrayList<>(currChildren);
-            for (int i = 0; i < currChildren; i++) {
-                TreeNode node = queue.poll();
-                assert node != null;
-                level.add(node.val);
-                if (node.left != null) {
-                    nextChildren += 1;
-                    queue.add(node.left);
-                }
-                if (node.right != null) {
-                    nextChildren += 1;
-                    queue.add(node.right);
-                }
-            }
-            currChildren = nextChildren;
-            if (!isZig) {
-                Collections.reverse(level);
-                isZig = true;
-            } else {
-                isZig = false;
-            }
-            levels.add(level);
+        if (isNotValidBst(root)) {
+            return false;
         }
-        return levels;
+        if (root.left != null) {
+            TreeNode larger = findLarger(root.left);
+            if (larger == null) {
+                return false;
+            }
+            if (root.val <= larger.val) {
+                return false;
+            }
+        }
+        if (root.right != null) {
+            TreeNode smaller = findSmaller(root.right);
+            if (smaller == null) {
+                return false;
+            }
+            if (root.val >= smaller.val) {
+                return false;
+            }
+        }
+        return isValidBST(root.left) && isValidBST(root.right);
+    }
+
+    TreeNode findLarger(TreeNode node) {
+        if (isNotValidBst(node)) {
+            return null;
+        }
+        if (node.right != null) {
+            return findLarger(node.right);
+        }
+        return node;
+    }
+
+    TreeNode findSmaller(TreeNode node) {
+        if (isNotValidBst(node)) {
+            return null;
+        }
+        if (node.left != null) {
+            return findSmaller(node.left);
+        }
+        return node;
+    }
+
+    boolean isNotValidBst(TreeNode node) {
+        return node.right != null && node.right.val <= node.val ||
+                node.left != null && node.left.val >= node.val;
     }
 
     public static void main(String[] args) {
         Solution solution = new Solution();
-        Integer[] vals;
-        TreeNode root;
-        List<List<Integer>> levelOrder;
-
-        vals = new Integer[]{3, 9, 20, null, null, 15, 7};
-        root = TreeNode.createTree(vals);
-        levelOrder = solution.zigzagLevelOrder(root);
-        System.out.println(levelOrder);
-
-        vals = new Integer[]{3, 5, null};
-        root = TreeNode.createTree(vals);
-        levelOrder = solution.zigzagLevelOrder(root);
-        System.out.println(levelOrder);
-
-        vals = new Integer[]{1, null, 2, null, 3, null, 4};
-        root = TreeNode.createTree(vals);
-        levelOrder = solution.zigzagLevelOrder(root);
-        System.out.println(levelOrder);
+        List<Integer[]> inputs = Arrays.asList(
+                new Integer[]{2, 1, 3}
+                , new Integer[]{5, 2, 6, 1, 3}
+                , new Integer[]{5, 1, 4, null, null, 3, 6}
+                , new Integer[]{5, 3, 6, 1, 5}
+                , new Integer[]{5, 2, 6, 1, 3, 4, null}
+                , new Integer[]{3, null, 30, 10, null, null, 15, null, 45}
+        );
+        for (Integer[] vals : inputs) {
+            TreeNode root = TreeNode.createTree(vals);
+            System.out.println(solution.isValidBST(root));
+        }
     }
 }
