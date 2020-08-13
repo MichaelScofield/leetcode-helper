@@ -1,4 +1,7 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 public class TreeNode {
 
@@ -44,29 +47,27 @@ public class TreeNode {
             System.out.println("null");
             return;
         }
-        Queue<TreeNode> queue = new LinkedList<>();
-        queue.offer(root);
-        TreeNode node;
-        while ((node = queue.poll()) != null) {
-            System.out.print(node.val);
-            System.out.print(' ');
-            if (node.left == null) {
-                System.out.print("null ");
-            } else {
-                queue.offer(node.left);
+        List<TreeNode> currLevel = new ArrayList<>();
+        currLevel.add(root);
+        while (true) {
+            System.out.println(currLevel);
+
+            List<TreeNode> nextLevel = new ArrayList<>();
+            for (TreeNode node : currLevel) {
+                if (node != null) {
+                    nextLevel.add(node.left);
+                    nextLevel.add(node.right);
+                }
             }
-            if (node.right == null) {
-                System.out.print("null ");
-            } else {
-                queue.offer(node.right);
+            if (nextLevel.stream().noneMatch(Objects::nonNull)) {
+                break;
             }
+            currLevel = nextLevel;
         }
     }
 
     @Override
     public String toString() {
-        return "TreeNode{" +
-                "val=" + val +
-                '}';
+        return String.valueOf(val);
     }
 }

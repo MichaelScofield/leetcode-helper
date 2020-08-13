@@ -3,72 +3,38 @@ import java.util.List;
 
 public class Solution {
 
-    public boolean isValidBST(TreeNode root) {
+    public TreeNode insertIntoBST(TreeNode root, int val) {
         if (root == null) {
-            return true;
+            return new TreeNode(val);
         }
-        if (isNotValidBst(root)) {
-            return false;
-        }
-        if (root.left != null) {
-            TreeNode larger = findLarger(root.left);
-            if (larger == null) {
-                return false;
+        assert val != root.val;
+        if (val < root.val) {
+            if (root.left == null) {
+                root.left = new TreeNode(val);
+            } else {
+                insertIntoBST(root.left, val);
             }
-            if (root.val <= larger.val) {
-                return false;
-            }
-        }
-        if (root.right != null) {
-            TreeNode smaller = findSmaller(root.right);
-            if (smaller == null) {
-                return false;
-            }
-            if (root.val >= smaller.val) {
-                return false;
+        } else {
+            if (root.right == null) {
+                root.right = new TreeNode(val);
+            } else {
+                insertIntoBST(root.right, val);
             }
         }
-        return isValidBST(root.left) && isValidBST(root.right);
-    }
-
-    TreeNode findLarger(TreeNode node) {
-        if (isNotValidBst(node)) {
-            return null;
-        }
-        if (node.right != null) {
-            return findLarger(node.right);
-        }
-        return node;
-    }
-
-    TreeNode findSmaller(TreeNode node) {
-        if (isNotValidBst(node)) {
-            return null;
-        }
-        if (node.left != null) {
-            return findSmaller(node.left);
-        }
-        return node;
-    }
-
-    boolean isNotValidBst(TreeNode node) {
-        return node.right != null && node.right.val <= node.val ||
-                node.left != null && node.left.val >= node.val;
+        return root;
     }
 
     public static void main(String[] args) {
         Solution solution = new Solution();
         List<Integer[]> inputs = Arrays.asList(
                 new Integer[]{2, 1, 3}
-                , new Integer[]{5, 2, 6, 1, 3}
-                , new Integer[]{5, 1, 4, null, null, 3, 6}
-                , new Integer[]{5, 3, 6, 1, 5}
-                , new Integer[]{5, 2, 6, 1, 3, 4, null}
-                , new Integer[]{3, null, 30, 10, null, null, 15, null, 45}
+                , new Integer[]{4, 2, 7, 1, 3}
         );
         for (Integer[] vals : inputs) {
             TreeNode root = TreeNode.createTree(vals);
-            System.out.println(solution.isValidBST(root));
+            root = solution.insertIntoBST(root, 5);
+            TreeNode.printTree(root);
+            System.out.println();
         }
     }
 }
