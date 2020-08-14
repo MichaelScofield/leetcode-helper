@@ -7,17 +7,35 @@ public class Solution {
         if (head == null) {
             return null;
         }
-        for (ListNode curr = head; ; ) {
-            if (curr.next == null) {
-                break;
-            }
+        ListNode newHead = null;
+        ListNode last = head, curr = head;
+        while (curr != null && curr.next != null) {
             if (curr.val == curr.next.val) {
-                curr.next = curr.next.next;
+                ListNode nextNotDuplicate = findNextNotDuplicate(curr);
+                last.next = curr = nextNotDuplicate;
             } else {
+                if (newHead == null) {
+                    newHead = curr;
+                }
+                last = curr;
                 curr = curr.next;
             }
         }
-        return head;
+        return newHead == null ? curr : newHead;
+    }
+
+    ListNode findNextNotDuplicate(ListNode head) {
+        ListNode curr = head;
+        while (curr != null) {
+            if (curr.next == null) {
+                return null;
+            }
+            if (curr.val != curr.next.val) {
+                return curr.next;
+            }
+            curr = curr.next;
+        }
+        return null;
     }
 
     public static void main(String[] args) {
@@ -27,6 +45,8 @@ public class Solution {
                 , new Integer[]{1, 1, 2, 3, 3}
                 , new Integer[]{1}
                 , new Integer[]{1, 1}
+                , new Integer[]{1, 2, 3, 3, 4, 4, 5}
+                , new Integer[]{1, 1, 1, 2, 3}
         );
         for (Integer[] vals : inputs) {
             ListNode head = ListNode.from(vals);
