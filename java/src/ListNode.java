@@ -12,7 +12,7 @@ public class ListNode {
         this.next = next;
     }
 
-    static ListNode from(int[] vals) {
+    static ListNode from(Integer[] vals) {
         ListNode head = null;
         ListNode curr = null;
         for (int val : vals) {
