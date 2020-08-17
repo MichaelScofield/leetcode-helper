@@ -3,39 +3,20 @@ import java.util.List;
 
 public class Solution {
 
-    public ListNode deleteDuplicates(ListNode head) {
+    public ListNode reverseList(ListNode head) {
         if (head == null) {
             return null;
         }
-        ListNode newHead = null;
-        ListNode last = head, curr = head;
-        while (curr != null && curr.next != null) {
-            if (curr.val == curr.next.val) {
-                ListNode nextNotDuplicate = findNextNotDuplicate(curr);
-                last.next = curr = nextNotDuplicate;
-            } else {
-                if (newHead == null) {
-                    newHead = curr;
-                }
-                last = curr;
-                curr = curr.next;
-            }
-        }
-        return newHead == null ? curr : newHead;
-    }
-
-    ListNode findNextNotDuplicate(ListNode head) {
-        ListNode curr = head;
+        ListNode prev = head;
+        ListNode curr = head.next;
+        head.next = null;
         while (curr != null) {
-            if (curr.next == null) {
-                return null;
-            }
-            if (curr.val != curr.next.val) {
-                return curr.next;
-            }
-            curr = curr.next;
+            ListNode next = curr.next;
+            curr.next = prev;
+            prev = curr;
+            curr = next;
         }
-        return null;
+        return prev;
     }
 
     public static void main(String[] args) {
@@ -50,7 +31,7 @@ public class Solution {
         );
         for (Integer[] vals : inputs) {
             ListNode head = ListNode.from(vals);
-            head = solution.deleteDuplicates(head);
+            head = solution.reverseList(head);
             ListNode.printList(head);
         }
     }
