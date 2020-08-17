@@ -3,65 +3,60 @@ import java.util.List;
 
 public class Solution {
 
-    public ListNode reverseBetween(ListNode head, int m, int n) {
+    public ListNode partition(ListNode head, int x) {
         if (head == null) {
             return null;
         }
-        assert m >= 1 && n >= m;
-        ListNode prev = null;
-        ListNode curr = head;
-        for (int i = 1; i < m; i++) {
-            prev = curr;
-            curr = curr.next;
-        }
-        ListNode reverse = reverse(curr, n - m + 1);
-        if (prev == null) {
-            return reverse;
-        }
-        prev.next = reverse;
-        return head;
-    }
-
-    ListNode reverse(ListNode node, int len) {
-        assert node != null;
-        ListNode prev = null;
-        ListNode curr = node;
-        int i = 0;
-        while (curr != null && i++ < len) {
+        ListNode prev = null, curr = head;
+        ListNode less = null;
+        while (curr != null) {
             ListNode next = curr.next;
-            curr.next = prev;
-            prev = curr;
+            if (curr.val < x) {
+                if (prev != null) {
+                    prev.next = next;
+                }
+                if (less == null) {
+                    less = curr;
+                    less.next = head;
+                    head = less;
+                } else {
+                    if (less != curr && less.next != curr) {
+                        ListNode lessNext = less.next;
+                        less.next = curr;
+                        curr.next = lessNext;
+                    }
+                    less = curr;
+                }
+            } else {
+                prev = curr;
+            }
             curr = next;
         }
-        node.next = curr;
-        return prev;
+        return head;
     }
 
     public static void main(String[] args) {
         Solution solution = new Solution();
         class TestCase {
             final ListNode list;
-            final int m;
-            final int n;
+            final int x;
 
-            TestCase(ListNode list, int m, int n) {
-                this.list = list;
-                this.m = m;
-                this.n = n;
+            TestCase(Integer[] list, int x) {
+                this.list = ListNode.from(list);
+                this.x = x;
             }
         }
         List<TestCase> inputs = Arrays.asList(
-                new TestCase(ListNode.from(new Integer[]{1, 2, 3, 4, 5}), 2, 4)
-                , new TestCase(ListNode.from(new Integer[]{1, 2, 3, 4, 5}), 1, 5)
-                , new TestCase(ListNode.from(new Integer[]{1, 2, 3, 4, 5}), 1, 1)
-                , new TestCase(ListNode.from(new Integer[]{1, 2, 3, 4, 5}), 3, 3)
-                , new TestCase(ListNode.from(new Integer[]{1, 2, 3, 4, 5}), 4, 5)
-                , new TestCase(ListNode.from(new Integer[]{1}), 1, 1)
-                , new TestCase(ListNode.from(new Integer[]{1, 2}), 2, 2)
-                , new TestCase(ListNode.from(new Integer[]{1, 2}), 1, 2)
+                new TestCase(new Integer[]{1, 4, 3, 2, 5, 2}, 3)
+                , new TestCase(new Integer[]{1, 2, 3, 4, 5}, 3)
+                , new TestCase(new Integer[]{1}, 1)
+                , new TestCase(new Integer[]{1, 2}, 2)
+                , new TestCase(new Integer[]{2, 3}, 2)
+                , new TestCase(new Integer[]{2, 1}, 2)
+                , new TestCase(new Integer[]{3, 2, 1}, 2)
         );
         for (TestCase testCase : inputs) {
-            ListNode head = solution.reverseBetween(testCase.list, testCase.m, testCase.n);
+            ListNode head = solution.partition(testCase.list, testCase.x);
             ListNode.printList(head);
         }
     }
