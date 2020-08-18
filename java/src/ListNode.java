@@ -56,4 +56,9 @@ public class ListNode {
         }
         return h1 == null && h2 == null;
     }
+
+    @Override
+    public String toString() {
+        return String.valueOf(val);
+    }
 }

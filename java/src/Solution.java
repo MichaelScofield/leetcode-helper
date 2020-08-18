@@ -3,60 +3,89 @@ import java.util.List;
 
 public class Solution {
 
-    public ListNode partition(ListNode head, int x) {
+    public ListNode sortList(ListNode head) {
         if (head == null) {
             return null;
         }
-        ListNode prev = null, curr = head;
-        ListNode less = null;
-        while (curr != null) {
-            ListNode next = curr.next;
-            if (curr.val < x) {
-                if (prev != null) {
-                    prev.next = next;
-                }
-                if (less == null) {
-                    less = curr;
-                    less.next = head;
-                    head = less;
-                } else {
-                    if (less != curr && less.next != curr) {
-                        ListNode lessNext = less.next;
-                        less.next = curr;
-                        curr.next = lessNext;
-                    }
-                    less = curr;
-                }
-            } else {
-                prev = curr;
-            }
-            curr = next;
+        return sort(head, null);
+    }
+
+    static class Partition {
+        final ListNode subListHead;
+        final ListNode pivotHead;
+        final ListNode subListTail;
+
+        Partition(ListNode subListHead, ListNode pivotHead, ListNode subListTail) {
+            this.subListHead = subListHead;
+            this.pivotHead = pivotHead;
+            this.subListTail = subListTail;
         }
-        return head;
+
+        @Override
+        public String toString() {
+            return "Partition{" +
+                    "subListHead=" + subListHead +
+                    ", pivotHead=" + pivotHead +
+                    ", subListTail=" + subListTail +
+                    '}';
+        }
+    }
+
+    ListNode sort(ListNode head, ListNode tailNext) {
+        if (head == tailNext || head.next == tailNext) {
+            return head;
+        }
+        Partition partition = partition(head, tailNext);
+        partition.subListTail.next = tailNext;
+        if (partition.subListHead == partition.pivotHead) {
+            partition.subListHead.next = sort(partition.pivotHead.next, tailNext);
+            return partition.subListHead;
+        } else {
+            sort(partition.pivotHead, tailNext);
+            return sort(partition.subListHead, partition.pivotHead);
+        }
+    }
+
+    Partition partition(ListNode head, ListNode tailNext) {
+        int pivot = head.val;
+        ListNode subListDummyHead = new ListNode(0, head);
+        ListNode subListHead = subListDummyHead;
+        ListNode pivotDummyHead = new ListNode(0, head);
+        ListNode pivotHead = pivotDummyHead;
+        while (head != tailNext) {
+            if (head.val < pivot) {
+                subListHead.next = head;
+                subListHead = subListHead.next;
+            } else {
+                pivotHead.next = head;
+                pivotHead = pivotHead.next;
+            }
+            head = head.next;
+        }
+        subListHead.next = pivotDummyHead.next;
+        return new Partition(subListDummyHead.next, pivotDummyHead.next, pivotHead);
     }
 
     public static void main(String[] args) {
         Solution solution = new Solution();
         class TestCase {
             final ListNode list;
-            final int x;
 
-            TestCase(Integer[] list, int x) {
+            TestCase(Integer[] list) {
                 this.list = ListNode.from(list);
-                this.x = x;
             }
         }
         List<TestCase> inputs = Arrays.asList(
-                new TestCase(new Integer[]{1, 4, 3, 2, 5, 2}, 3)
-                , new TestCase(new Integer[]{1, 2, 3, 4, 5}, 3)
-                , new TestCase(new Integer[]{1}, 1)
-                , new TestCase(new Integer[]{1, 2}, 2)
-                , new TestCase(new Integer[]{2, 3}, 2)
-                , new TestCase(new Integer[]{2, 1}, 2)
-                , new TestCase(new Integer[]{3, 2, 1}, 2)
+                new TestCase(new Integer[]{3, 2, 1}),
+                new TestCase(new Integer[]{1, 2, 3, 4, 5}),
+                new TestCase(new Integer[]{1, 4, 3, 2, 5, 2}),
+                new TestCase(new Integer[]{-1, 5, 3, 4, 0}),
+                new TestCase(new Integer[]{4, 2, 1, 3}),
+                new TestCase(new Integer[]{1, 2}),
+                new TestCase(new Integer[]{1})
         );
         for (TestCase testCase : inputs) {
-            ListNode head = solution.partition(testCase.list, testCase.x);
+            ListNode head = solution.sortList(testCase.list);
             ListNode.printList(head);
         }
     }
