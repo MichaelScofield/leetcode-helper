@@ -3,28 +3,38 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn subsets(nums: Vec<i32>) -> Vec<Vec<i32>> {
-        if nums.len() < 1 {
-            return Vec::with_capacity(0);
+    pub fn coin_change(coins: Vec<i32>, amount: i32) -> i32 {
+        if coins.len() < 1 {
+            return -1;
         }
-        fn subsets(nums: &[i32], mut result: Vec<i32>, results: &mut Vec<Vec<i32>>) {
-            results.push(result.clone());
-            for i in 0..nums.len() {
-                result.push(nums[i]);
-                subsets(&nums[i + 1..], result.clone(), results);
-                result.pop();
+        if amount < 1 {
+            return 0;
+        }
+        fn coin_change(coins: &Vec<i32>, amount: i32, n: i32, min: &mut i32) {
+            for &coin in coins {
+                if amount == coin {
+                    if n + 1 < *min {
+                        *min = n + 1;
+                    }
+                    return;
+                }
+                if amount > coin {
+                    coin_change(&coins, amount - coin, n + 1, min);
+                }
             }
         }
-        let mut results = vec![];
-        subsets(nums.as_slice(), vec![], &mut results);
-        results
+        let mut min = std::i32::MAX;
+        coin_change(&coins, amount, 0, &mut min);
+        if min == std::i32::MAX { -1 } else { min }
     }
 }
 
 fn main() {
-    println!("{:?}", Solution::subsets(vec![]));
-    println!("{:?}", Solution::subsets(vec![1]));
-    println!("{:?}", Solution::subsets(vec![1, 2]));
-    println!("{:?}", Solution::subsets(vec![1, 2, 3]));
-    println!("{:?}", Solution::subsets(vec![1, 2, 3, 4]));
+    assert_eq!(20, Solution::coin_change(vec![186, 419, 83, 408], 6249));
+    assert_eq!(20, Solution::coin_change(vec![1, 2, 5], 100));
+    assert_eq!(3, Solution::coin_change(vec![1, 2, 5], 11));
+    assert_eq!(4, Solution::coin_change(vec![1, 2, 5], 20));
+    assert_eq!(1, Solution::coin_change(vec![1, 2, 5], 1));
+    assert_eq!(1, Solution::coin_change(vec![1, 2, 5], 2));
+    assert_eq!(-1, Solution::coin_change(vec![2], 3));
 }
