@@ -3,38 +3,102 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn coin_change(coins: Vec<i32>, amount: i32) -> i32 {
-        if coins.len() < 1 {
-            return -1;
+    pub fn solve_n_queens(n: i32) -> Vec<Vec<String>> {
+        if n < 1 {
+            return Vec::with_capacity(0);
         }
-        if amount < 1 {
-            return 0;
-        }
-        fn coin_change(coins: &Vec<i32>, amount: i32, n: i32, min: &mut i32) {
-            for &coin in coins {
-                if amount == coin {
-                    if n + 1 < *min {
-                        *min = n + 1;
-                    }
-                    return;
+        fn place_queue(board: &mut Vec<Vec<u8>>, i: usize, start: usize) -> i32 {
+            let mut j = -1;
+            for (y, x) in board[i].iter_mut().skip(start).enumerate() {
+                if *x == b'0' {
+                    j = (y + start) as i32;
+                    break;
                 }
-                if amount > coin {
-                    coin_change(&coins, amount - coin, n + 1, min);
+            }
+            let n = board.len();
+            if j < 0 {
+                return -1;
+            }
+            let j = j as usize;
+            board[i].iter_mut().for_each(|x| *x = b'.');
+            board.iter_mut().for_each(|line| line[j] = b'.');
+            let (mut x, mut y) = (i, j);
+            loop {
+                board[x][y] = b'.';
+                if x == n - 1 || y == n - 1 {
+                    break;
+                }
+                x += 1;
+                y += 1;
+            }
+            let (mut x, mut y) = (i, j);
+            loop {
+                board[x][y] = b'.';
+                if x == 0 || y == 0 {
+                    break;
+                }
+                x -= 1;
+                y -= 1;
+            }
+            let (mut x, mut y) = (i, j);
+            loop {
+                board[x][y] = b'.';
+                if x == n - 1 || y == 0 {
+                    break;
+                }
+                x += 1;
+                y -= 1;
+            }
+            let (mut x, mut y) = (i, j);
+            loop {
+                board[x][y] = b'.';
+                if x == 0 || y == n - 1 {
+                    break;
+                }
+                x -= 1;
+                y += 1;
+            }
+            board[i][j] = b'Q';
+            j as i32
+        }
+        fn solve_n_queens(board: &mut Vec<Vec<u8>>, i: usize, res: &mut Vec<Vec<Vec<u8>>>) {
+            if i == board.len() {
+                res.push(board.to_owned());
+                return;
+            }
+            let mut j = 0;
+            loop {
+                if j >= board.len() {
+                    break;
+                }
+                let mut board = board.clone();
+                let place = place_queue(&mut board, i, j);
+                if place >= 0 {
+                    solve_n_queens(&mut board, i + 1, res);
+                    j = place as usize + 1;
+                } else {
+                    break;
                 }
             }
         }
-        let mut min = std::i32::MAX;
-        coin_change(&coins, amount, 0, &mut min);
-        if min == std::i32::MAX { -1 } else { min }
+        let n = n as usize;
+        let mut board = vec![vec![b'0'; n]; n];
+        let mut res = vec![];
+        solve_n_queens(&mut board, 0, &mut res);
+        res.into_iter()
+            .map(|board| board.into_iter()
+                .map(|line| String::from_utf8(line).unwrap())
+                .collect())
+            .collect()
     }
 }
 
 fn main() {
-    assert_eq!(20, Solution::coin_change(vec![186, 419, 83, 408], 6249));
-    assert_eq!(20, Solution::coin_change(vec![1, 2, 5], 100));
-    assert_eq!(3, Solution::coin_change(vec![1, 2, 5], 11));
-    assert_eq!(4, Solution::coin_change(vec![1, 2, 5], 20));
-    assert_eq!(1, Solution::coin_change(vec![1, 2, 5], 1));
-    assert_eq!(1, Solution::coin_change(vec![1, 2, 5], 2));
-    assert_eq!(-1, Solution::coin_change(vec![2], 3));
+    let boards = Solution::solve_n_queens(4);
+    for board in boards {
+        for line in board {
+            println!("{}", line);
+        }
+        println!();
+    }
 }
