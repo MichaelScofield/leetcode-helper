@@ -1,34 +1,35 @@
 public class Solution {
 
-    public String replaceSpace(String s) {
-        if (s == null || s.isEmpty()) {
-            return s;
+    public TreeNode buildTree(int[] preorder, int[] inorder) {
+        if (preorder == null || inorder == null
+                || preorder.length != inorder.length
+                || preorder.length < 1) {
+            return null;
         }
-        int whitespaces = (int) s.chars().filter(c -> c == ' ').count();
-        if (whitespaces < 1) {
-            return s;
+        return buildTree(preorder, 0, preorder.length, inorder, 0, inorder.length);
+    }
+
+    TreeNode buildTree(int[] preorder, int p, int q, int[] inorder, int x, int y) {
+        if (p >= q || x >= y) {
+            return null;
         }
-        char[] chars = s.toCharArray();
-        char[] newChars = new char[chars.length - whitespaces + whitespaces * 3];
-        for (int i = chars.length - 1, j = newChars.length - 1; i >= 0; i--) {
-            if (chars[i] == ' ') {
-                newChars[j--] = '0';
-                newChars[j--] = '2';
-                newChars[j--] = '%';
-            } else {
-                newChars[j--] = chars[i];
+        TreeNode root = new TreeNode(preorder[p]);
+        int i;
+        for (i = x; i < y; i++) {
+            if (inorder[i] == preorder[p]) {
+                break;
             }
         }
-        return new String(newChars, 0, newChars.length);
+        root.left = buildTree(preorder, p + 1, p + 1 + (i - x), inorder, x, i);
+        root.right = buildTree(preorder, p + 1 + (i - x), q, inorder, i + 1, y);
+        return root;
     }
 
     public static void main(String[] args) {
         Solution solution = new Solution();
-        System.out.println(solution.replaceSpace(" "));
-        System.out.println(solution.replaceSpace("a "));
-        System.out.println(solution.replaceSpace(" b"));
-        System.out.println(solution.replaceSpace("a b"));
-        System.out.println(solution.replaceSpace("happy."));
-        System.out.println(solution.replaceSpace("We are happy."));
+        int[] preorder = new int[]{3, 9, 20, 15, 7};
+        int[] inorder = new int[]{9, 3, 15, 20, 7};
+        TreeNode root = solution.buildTree(preorder, inorder);
+        TreeNode.printTree(root);
     }
 }
