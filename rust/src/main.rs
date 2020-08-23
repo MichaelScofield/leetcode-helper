@@ -3,42 +3,43 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn my_pow(x: f64, n: i32) -> f64 {
-        if n == 0 {
-            return 1.0;
+    pub fn find_min(nums: Vec<i32>) -> i32 {
+        assert!(nums.len() > 0);
+        if nums.len() == 1 {
+            return nums[0];
         }
-        if x == 0.0 {
-            return 0.0;
+        let n = nums.len();
+        if nums[0] < nums[n - 1] {
+            return nums[0];
         }
-        if n == 1 {
-            return x;
-        }
-        let m = n.abs() as usize;
-        let mut dp = vec![0.0; m + 1];
-        fn pow(x: f64, n: usize, dp: &mut Vec<f64>) -> f64 {
-            if n == 1 {
-                return x;
+        let mut i = 0;
+        let mut j = n - 1;
+        loop {
+            let mid = i + (j - i) / 2;
+            if nums[mid] > nums[i] {
+                i = mid;
+            } else if nums[mid] < nums[j] {
+                j = mid;
+            } else {
+                for k in i..j {
+                    if nums[k] > nums[k + 1] {
+                        return nums[k + 1];
+                    }
+                }
+                break;
             }
-            if dp[n] != 0.0 {
-                return dp[n];
+            if i + 1 >= j {
+                break;
             }
-            let m = n / 2;
-            dp[m] = pow(x, m, dp);
-            if n % 2 == 1 {
-                dp[n - m] = pow(x, n - m, dp);
-            }
-            dp[m] * dp[n - m]
         }
-        let result = pow(x, m, &mut dp);
-        if n > 0 { result } else { 1.0 / result }
+        nums[j]
     }
 }
 
 fn main() {
-    println!("{}", Solution::my_pow(0.00001, 2147483647));
-    println!("{}", Solution::my_pow(2.0, 10));
-    println!("{}", Solution::my_pow(2.1, 3));
-    println!("{}", Solution::my_pow(2.0, -2));
-    println!("{}", Solution::my_pow(0.0, 9));
-    println!("{}", Solution::my_pow(1.0, 8));
+    println!("{}", Solution::find_min(vec![3, 4, 5, 1, 2]));
+    println!("{}", Solution::find_min(vec![4, 5, 6, 7, 0, 1, 2]));
+    println!("{}", Solution::find_min(vec![1, 1, 1]));
+    println!("{}", Solution::find_min(vec![1, 1, 2]));
+    println!("{}", Solution::find_min(vec![1, 1, 1, 0, 1]));
 }
