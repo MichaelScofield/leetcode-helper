@@ -19,21 +19,17 @@ impl Solution {
             return -1;
         }
         let target = target.into_bytes().into_iter().map(|b| b - 48).collect::<Vec<u8>>();
-        let mut min_turns = std::i32::MAX;
         let mut tried_locks = HashSet::new();
         use std::collections::VecDeque;
         let mut queue = VecDeque::new();
         queue.push_back((vec![0, 0, 0, 0], 0));
         while let Some((mut lock, turns)) = queue.pop_front() {
-            if turns >= min_turns {
-                continue;
-            }
             if tried_locks.contains(&lock) {
                 continue;
             }
             tried_locks.insert(lock.clone());
             if lock.eq(&target) {
-                min_turns = std::cmp::min(min_turns, turns);
+                return turns;
             }
             for i in 0..4 {
                 let stash = lock[i];
@@ -46,7 +42,7 @@ impl Solution {
                 lock[i] = stash;
             }
         }
-        if min_turns == std::i32::MAX { -1 } else { min_turns }
+        -1
     }
 }
 
