@@ -1,59 +1,34 @@
-use crate::helper::util::to_string_vec;
-
 mod helper;
 
 struct Solution;
 
 impl Solution {
-    pub fn open_lock(deadends: Vec<String>, target: String) -> i32 {
-        if target.eq("0000") {
+    pub fn max_profit(prices: Vec<i32>) -> i32 {
+        if prices.len() == 0 {
             return 0;
         }
-        use std::collections::HashSet;
-        let deadends = deadends.into_iter()
-            .map(|deadend| deadend.into_bytes().into_iter()
-                .map(|b| b - 48)
-                .collect::<Vec<u8>>())
-            .collect::<HashSet<Vec<u8>>>();
-        if deadends.contains(&vec![0, 0, 0, 0]) {
-            return -1;
+        let n = prices.len();
+        let k = 1;
+        let mut dp = vec![vec![vec![0, 0]; k + 1]; n + 1];
+        for x in 0..n + 1 {
+            dp[x][0][0] = 0;
+            dp[x][0][1] = std::i32::MIN;
         }
-        let target = target.into_bytes().into_iter().map(|b| b - 48).collect::<Vec<u8>>();
-        let mut tried_locks = HashSet::new();
-        use std::collections::VecDeque;
-        let mut queue = VecDeque::new();
-        queue.push_back((vec![0, 0, 0, 0], 0));
-        while let Some((mut lock, turns)) = queue.pop_front() {
-            if tried_locks.contains(&lock) {
-                continue;
-            }
-            tried_locks.insert(lock.clone());
-            if lock.eq(&target) {
-                return turns;
-            }
-            for i in 0..4 {
-                let stash = lock[i];
-                for j in vec![1, 9] {
-                    lock[i] = (stash + j) % 10;
-                    if !deadends.contains(&lock) {
-                        queue.push_back((lock.clone(), turns + 1));
-                    }
-                }
-                lock[i] = stash;
+        for x in 0..k + 1 {
+            dp[0][x][0] = 0;
+            dp[0][x][1] = std::i32::MIN;
+        }
+        for x in 1..n + 1 {
+            for y in 1..k + 1 {
+                dp[x][y][0] = std::cmp::max(dp[x - 1][y][0], dp[x - 1][y][1] + prices[x - 1]);
+                dp[x][y][1] = std::cmp::max(dp[x - 1][y - 1][0] - prices[x - 1], dp[x - 1][y][1]);
             }
         }
-        -1
+        dp[n][k][0]
     }
 }
 
 fn main() {
-    let deadends = to_string_vec(vec!["0201", "0101", "0102", "1212", "2002"]);
-    assert_eq!(6, Solution::open_lock(deadends, "0202".to_owned()));
-    let deadends = to_string_vec(vec!["8888"]);
-    assert_eq!(1, Solution::open_lock(deadends, "0009".to_owned()));
-    let deadends = to_string_vec(
-        vec!["8887", "8889", "8878", "8898", "8788", "8988", "7888", "9888"]);
-    assert_eq!(-1, Solution::open_lock(deadends, "8888".to_owned()));
-    let deadends = to_string_vec(vec!["0000"]);
-    assert_eq!(-1, Solution::open_lock(deadends, "8888".to_owned()));
+    assert_eq!(5, Solution::max_profit(vec![7, 1, 5, 3, 6, 4]));
+    assert_eq!(0, Solution::max_profit(vec![7, 6, 4, 3, 1]));
 }
