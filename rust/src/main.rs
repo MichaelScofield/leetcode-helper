@@ -3,47 +3,28 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn max_profit(k: i32, prices: Vec<i32>) -> i32 {
-        if prices.len() == 0 {
-            return 0;
+    pub fn can_partition(nums: Vec<i32>) -> bool {
+        let sum = nums.iter().sum::<i32>() as usize;
+        if sum % 2 != 0 {
+            return false;
         }
-        let n = prices.len();
-        let k = k as usize;
-        if k > n / 2 {
-            return Solution::max_profit_simple(prices);
+        let n = nums.len();
+        let w = sum / 2;
+        let mut dp = vec![vec![false; w + 1]; n + 1];
+        for i in 0..=n {
+            dp[i][0] = true;
         }
-        let mut dp = vec![vec![vec![0, 0]; k + 1]; n + 1];
-        for x in 0..n + 1 {
-            dp[x][0][0] = 0;
-            dp[x][0][1] = std::i32::MIN;
-        }
-        for x in 0..k + 1 {
-            dp[0][x][0] = 0;
-            dp[0][x][1] = std::i32::MIN;
-        }
-        for x in 1..n + 1 {
-            for y in 1..k + 1 {
-                dp[x][y][0] = std::cmp::max(dp[x - 1][y][0], dp[x - 1][y][1] + prices[x - 1]);
-                dp[x][y][1] = std::cmp::max(dp[x - 1][y - 1][0] - prices[x - 1], dp[x - 1][y][1]);
+        for i in 1..=n {
+            let num = nums[i - 1] as usize;
+            for j in num..=w {
+                dp[i][j] = dp[i - 1][j] || dp[i - 1][j - num];
             }
         }
-        dp[n][k][0]
-    }
-
-    fn max_profit_simple(prices: Vec<i32>) -> i32 {
-        let n = prices.len();
-        let mut dp = vec![vec![0, 0]; n + 1];
-        dp[0][0] = 0;
-        dp[0][1] = std::i32::MIN;
-        for x in 1..n + 1 {
-            dp[x][0] = std::cmp::max(dp[x - 1][0], dp[x - 1][1] + prices[x - 1]);
-            dp[x][1] = std::cmp::max(dp[x - 1][0] - prices[x - 1], dp[x - 1][1]);
-        }
-        dp[n][0]
+        dp[n][w]
     }
 }
 
 fn main() {
-    assert_eq!(2, Solution::max_profit(2, vec![2, 4, 1]));
-    assert_eq!(7, Solution::max_profit(2, vec![3, 2, 6, 5, 0, 3]));
+    assert!(Solution::can_partition(vec![1, 5, 11, 5]));
+    assert!(!Solution::can_partition(vec![1, 2, 3, 5]));
 }
