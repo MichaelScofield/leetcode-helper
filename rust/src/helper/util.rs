@@ -164,7 +164,7 @@ pub fn list_to_num(node: Option<Box<ListNode>>) -> i32 {
 }
 
 #[allow(dead_code)]
-fn print_matrix(matrix: &Vec<Vec<i32>>) {
+pub fn print_matrix(matrix: &Vec<Vec<i32>>) {
     for row in matrix.iter() {
         println!("{:?}", row);
     }
