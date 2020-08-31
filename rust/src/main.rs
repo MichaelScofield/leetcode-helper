@@ -3,36 +3,44 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    // https://labuladong.gitbook.io/algo/di-ling-zhang-bi-du-xi-lie/bei-bao-ling-qian
-    pub fn change(amount: i32, coins: Vec<i32>) -> i32 {
-        if amount == 0 {
-            return 1;
-        }
-        if coins.len() == 0 {
+    pub fn find_target_sum_ways(nums: Vec<i32>, s: i32) -> i32 {
+        if nums.len() == 0 {
             return 0;
         }
-        let n = coins.len();
-        let amount = amount as usize;
-        let mut dp = vec![vec![0; amount + 1]; n + 1];
-        for i in 1..=n {
-            dp[i][0] = 1;
+        let n = nums.len();
+        let sum = nums.iter().sum::<i32>() as usize;
+
+        let s = s.abs() as usize;
+        if sum < s {
+            return 0;
         }
+
+        // State transition equation:
+        // dp[i][j] = dp[i - 1][|j - nums[i]|] + dp[i - 1][j + nums[i]]
+        // Why "|j - nums[i]|"?
+        // Because for every solution,
+        // Σ(nums) = -s <=> -Σ(nums) = s,
+        // we can omit the storage for negative sum by dp[-sum] = dp[sum].
+        let mut dp = vec![vec![0; sum + 1]; n + 1];
+        dp[0][0] = 1;
         for i in 1..=n {
-            let coin = coins[i - 1] as usize;
-            for j in 1..=amount {
-                if j < coin {
-                    dp[i][j] = dp[i - 1][j];
+            let num = nums[i - 1] as usize;
+            for j in 0..=sum {
+                if j >= num {
+                    dp[i][j] += dp[i - 1][j - num];
                 } else {
-                    dp[i][j] = dp[i - 1][j] + dp[i][j - coin];
+                    dp[i][j] += dp[i - 1][num - j];
+                }
+                if j + num <= sum {
+                    dp[i][j] += dp[i - 1][j + num];
                 }
             }
         }
-        dp[n][amount]
+        dp[n][s]
     }
 }
 
 fn main() {
-    assert_eq!(4, Solution::change(5, vec![1, 2, 5]));
-    assert_eq!(0, Solution::change(3, vec![2]));
-    assert_eq!(1, Solution::change(10, vec![10]));
+    assert_eq!(5, Solution::find_target_sum_ways(vec![1, 1, 1, 1, 1], 3));
+    assert_eq!(0, Solution::find_target_sum_ways(vec![1], 2));
 }
