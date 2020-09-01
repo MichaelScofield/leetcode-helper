@@ -3,24 +3,46 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn max_sub_array(nums: Vec<i32>) -> i32 {
-        if nums.len() == 0 {
-            return 0;
+    pub fn my_pow(x: f64, n: i32) -> f64 {
+        if n == 0 {
+            return 1.0;
         }
-        let n = nums.len();
-        let mut dp = vec![0; n];
-        let mut max = std::i32::MIN;
-        for i in 1..=n {
-            for j in 0..=n - i {
-                dp[j] = dp[j] + nums[j + i - 1];
-                max = std::cmp::max(max, dp[j]);
+        if x == 0.0 {
+            assert!(n > 0);
+            return 0.0;
+        }
+        let m = n.abs() as u32;
+        use std::collections::HashMap;
+        let mut memo = HashMap::new();
+        fn pow(x: f64, i: u32, memo: &mut HashMap<u32, f64>) -> f64 {
+            if i == 0 {
+                return 1.0;
+            }
+            if i == 1 {
+                return x;
+            }
+            if let Some(&value) = memo.get(&i) {
+                return value;
+            }
+            let a = pow(x, i / 2, memo);
+            memo.insert(i / 2, a);
+            if i % 2 == 0 {
+                a * a
+            } else {
+                memo.insert(i / 2 + 1, a * x);
+                a * a * x
             }
         }
-        max
+        let result = pow(x, m, &mut memo);
+        if n > 0 { result } else { 1.0 / result }
     }
 }
 
 fn main() {
-    assert_eq!(6, Solution::max_sub_array(vec![-2, 1, -3, 4, -1, 2, 1, -5, 4]));
-    assert_eq!(-1, Solution::max_sub_array(vec![-1]));
+    println!("{}", Solution::my_pow(0.00001, 2147483647));
+    println!("{}", Solution::my_pow(2.0, 10));
+    println!("{}", Solution::my_pow(2.1, 3));
+    println!("{}", Solution::my_pow(2.0, -2));
+    println!("{}", Solution::my_pow(0.0, 9));
+    println!("{}", Solution::my_pow(1.0, 8));
 }
