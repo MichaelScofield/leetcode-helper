@@ -1,66 +1,36 @@
 public class Solution {
 
-    public ListNode detectCycle(ListNode head) {
-        if (head == null) {
-            return null;
+    public ListNode mergeTwoLists(ListNode l1, ListNode l2) {
+        if (l1 == null) {
+            return l2;
         }
-        ListNode fast = head, slow = head;
-        while (fast.next != null) {
-            if (fast.next.next == null) {
-                return null;
+        if (l2 == null) {
+            return l1;
+        }
+        ListNode dummyHead = new ListNode(0);
+        ListNode curr = dummyHead;
+        while (l1 != null && l2 != null) {
+            if (l1.val < l2.val) {
+                curr.next = l1;
+                l1 = l1.next;
+            } else {
+                curr.next = l2;
+                l2 = l2.next;
             }
-            fast = fast.next.next;
-            slow = slow.next;
-            if (fast == slow) {
-                break;
-            }
+            curr = curr.next;
         }
-        if (fast.next == null) {
-            return null;
+        if (l1 != null) {
+            curr.next = l1;
+        } else {
+            curr.next = l2;
         }
-        ListNode meet = slow;
-        int n = 1;
-        while (slow.next != meet) {
-            slow = slow.next;
-            n += 1;
-        }
-        fast = slow = head;
-        for (int i = 0; i < n; i++) {
-            fast = fast.next;
-        }
-        while (fast != slow) {
-            fast = fast.next;
-            slow = slow.next;
-        }
-        return slow;
+        return dummyHead.next;
     }
 
     public static void main(String[] args) {
         Solution solution = new Solution();
-        ListNode head, node;
-
-        head = ListNode.from(new Integer[]{3, 2, 0, 4}, 1);
-        node = solution.detectCycle(head);
-        System.out.println(node);
-
-        head = ListNode.from(new Integer[]{3, 2, 0, 4}, 3);
-        node = solution.detectCycle(head);
-        System.out.println(node);
-
-        head = ListNode.from(new Integer[]{3, 2, 0, 4}, null);
-        node = solution.detectCycle(head);
-        System.out.println(node);
-
-        head = ListNode.from(new Integer[]{3, 2, 0}, null);
-        node = solution.detectCycle(head);
-        System.out.println(node);
-
-        head = ListNode.from(new Integer[]{1, 2}, 0);
-        node = solution.detectCycle(head);
-        System.out.println(node);
-
-        head = ListNode.from(new Integer[]{1}, null);
-        node = solution.detectCycle(head);
-        System.out.println(node);
+        ListNode l1 = ListNode.from(new Integer[]{1, 2, 4}, null);
+        ListNode l2 = ListNode.from(new Integer[]{1, 3, 4}, null);
+        ListNode.printList(solution.mergeTwoLists(l1, l2));
     }
 }
