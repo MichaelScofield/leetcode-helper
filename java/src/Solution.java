@@ -1,36 +1,38 @@
 public class Solution {
 
-    public ListNode mergeTwoLists(ListNode l1, ListNode l2) {
-        if (l1 == null) {
-            return l2;
+    public boolean isSubStructure(TreeNode A, TreeNode B) {
+        if (A == null || B == null) {
+            return false;
         }
-        if (l2 == null) {
-            return l1;
+        if (isSameLargerTree(A, B)) {
+            return true;
         }
-        ListNode dummyHead = new ListNode(0);
-        ListNode curr = dummyHead;
-        while (l1 != null && l2 != null) {
-            if (l1.val < l2.val) {
-                curr.next = l1;
-                l1 = l1.next;
-            } else {
-                curr.next = l2;
-                l2 = l2.next;
-            }
-            curr = curr.next;
+        return isSubStructure(A.left, B) || isSubStructure(A.right, B);
+    }
+
+    boolean isSameLargerTree(TreeNode ra, TreeNode rb) {
+        if (rb == null) {
+            return true;
         }
-        if (l1 != null) {
-            curr.next = l1;
-        } else {
-            curr.next = l2;
+        if (ra == null) {
+            return false;
         }
-        return dummyHead.next;
+        if (ra.val != rb.val) {
+            return false;
+        }
+        return isSameLargerTree(ra.left, rb.left) && isSameLargerTree(ra.right, rb.right);
     }
 
     public static void main(String[] args) {
         Solution solution = new Solution();
-        ListNode l1 = ListNode.from(new Integer[]{1, 2, 4}, null);
-        ListNode l2 = ListNode.from(new Integer[]{1, 3, 4}, null);
-        ListNode.printList(solution.mergeTwoLists(l1, l2));
+        TreeNode A, B;
+
+        A = TreeNode.createTree(new Integer[]{1, 2, 3});
+        B = TreeNode.createTree(new Integer[]{3, 1, null});
+        System.out.println(!solution.isSubStructure(A, B));
+
+        A = TreeNode.createTree(new Integer[]{3, 4, 5, 1, 2});
+        B = TreeNode.createTree(new Integer[]{4, 1, null});
+        System.out.println(solution.isSubStructure(A, B));
     }
 }
