@@ -1,52 +1,66 @@
 public class Solution {
 
-    public ListNode removeNthFromEnd(ListNode head, int n) {
+    public ListNode detectCycle(ListNode head) {
         if (head == null) {
             return null;
         }
-        if (n <= 0) {
-            return head;
-        }
         ListNode fast = head, slow = head;
-        for (int i = 0; i < n - 1; i++) {
-            if (fast.next != null) {
-                fast = fast.next;
-            } else {
-                return head;
+        while (fast.next != null) {
+            if (fast.next.next == null) {
+                return null;
+            }
+            fast = fast.next.next;
+            slow = slow.next;
+            if (fast == slow) {
+                break;
             }
         }
-        ListNode prev = null;
-        while (fast.next != null) {
+        if (fast.next == null) {
+            return null;
+        }
+        ListNode meet = slow;
+        int n = 1;
+        while (slow.next != meet) {
+            slow = slow.next;
+            n += 1;
+        }
+        fast = slow = head;
+        for (int i = 0; i < n; i++) {
             fast = fast.next;
-            prev = slow;
+        }
+        while (fast != slow) {
+            fast = fast.next;
             slow = slow.next;
         }
-        if (prev == null) {
-            return head.next;
-        } else {
-            prev.next = slow.next;
-            return head;
-        }
+        return slow;
     }
 
     public static void main(String[] args) {
         Solution solution = new Solution();
-        ListNode head;
+        ListNode head, node;
 
-        head = ListNode.from(new Integer[]{1, 2, 3, 4, 5});
-        head = solution.removeNthFromEnd(head, 2);
-        ListNode.printList(head);
+        head = ListNode.from(new Integer[]{3, 2, 0, 4}, 1);
+        node = solution.detectCycle(head);
+        System.out.println(node);
 
-        head = ListNode.from(new Integer[]{1, 2, 3, 4, 5});
-        head = solution.removeNthFromEnd(head, 1);
-        ListNode.printList(head);
+        head = ListNode.from(new Integer[]{3, 2, 0, 4}, 3);
+        node = solution.detectCycle(head);
+        System.out.println(node);
 
-        head = ListNode.from(new Integer[]{1, 2, 3, 4, 5});
-        head = solution.removeNthFromEnd(head, 5);
-        ListNode.printList(head);
+        head = ListNode.from(new Integer[]{3, 2, 0, 4}, null);
+        node = solution.detectCycle(head);
+        System.out.println(node);
 
-        head = ListNode.from(new Integer[]{1, 2, 3, 4, 5});
-        head = solution.removeNthFromEnd(head, 6);
-        ListNode.printList(head);
+        head = ListNode.from(new Integer[]{3, 2, 0}, null);
+        node = solution.detectCycle(head);
+        System.out.println(node);
+
+        head = ListNode.from(new Integer[]{1, 2}, 0);
+        node = solution.detectCycle(head);
+        System.out.println(node);
+
+        head = ListNode.from(new Integer[]{1}, null);
+        node = solution.detectCycle(head);
+        System.out.println(node);
     }
 }

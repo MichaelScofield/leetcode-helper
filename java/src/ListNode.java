@@ -12,17 +12,25 @@ public class ListNode {
         this.next = next;
     }
 
-    static ListNode from(Integer[] vals) {
+    static ListNode from(Integer[] vals, Integer cyclePos) {
         ListNode head = null;
         ListNode curr = null;
-        for (int val : vals) {
+        ListNode cycleNode = null;
+        for (int i = 0; i < vals.length; i++) {
+            int val = vals[i];
             ListNode node = new ListNode(val);
+            if (cyclePos != null && cycleNode == null && i == cyclePos) {
+                cycleNode = node;
+            }
             if (head == null) {
                 head = curr = node;
                 continue;
             }
             curr.next = node;
             curr = node;
+        }
+        if (cycleNode != null) {
+            curr.next = cycleNode;
         }
         return head;
     }
