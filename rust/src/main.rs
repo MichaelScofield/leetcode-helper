@@ -3,60 +3,135 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn find_diagonal_order(nums: Vec<Vec<i32>>) -> Vec<i32> {
-        let m = nums.len();
-        assert!(m >= 1);
-        let (size, n) = nums.iter()
-            .map(|row| (row.len(), row.len()))
-            .fold((0, 0), |acc, x|
-                (acc.0 + x.0, std::cmp::max(acc.1, x.1)));
-        let mut result = Vec::with_capacity(size);
-        for i in 0..m {
-            let mut x = i;
-            for j in 0..n {
-                if j < nums[x].len() {
-                    result.push(nums[x][j]);
+    /*
+    s1 --(num)--> s3 (Terminal)
+    s1 --(+/-)--> s2
+    s1 --(.)--> s7
+
+    s2 --(num)--> s3 (Terminal)
+    s2 --(.)--> s7
+
+    s3 --(num)--> s3 (Terminal)
+    s3 --(e/E)--> s4
+    s3 --(.)--> s7 (Terminal)
+
+    s4 --(empty/+/-)--> s5
+
+    s5 --(num)--> s6 (Terminal)
+
+    s6 --(num)--> s6 (Terminal)
+
+    s7 --(num)--> s8
+
+    s8 --(num)--> s8 (Terminal)
+    s8 --(e/E)--> s4
+    */
+    pub fn is_number(s: String) -> bool {
+        if s.len() == 0 {
+            return false;
+        }
+        let is_sign = |c| { c == '+' || c == '-' };
+        let is_dot = |c| { c == '.' };
+        let is_e = |c| { c == 'e' || c == 'E' };
+        let s: Vec<char> = s.trim().chars().collect();
+        let n = s.len();
+        if n == 1 && s[0] == '.' {
+            return false;
+        }
+        let mut state = 1;
+        let mut i = 0;
+        while i < n {
+            let c = s[i];
+            i += 1;
+            match state {
+                1 => {
+                    if c.is_ascii_digit() {
+                        state = 3;
+                    } else if is_sign(c) {
+                        state = 2;
+                    } else if is_dot(c) {
+                        state = 7;
+                    } else {
+                        return false;
+                    }
                 }
-                if x == 0 {
-                    break;
+                2 => {
+                    if c.is_ascii_digit() {
+                        state = 3;
+                    } else if is_dot(c) {
+                        state = 7;
+                    } else {
+                        return false;
+                    }
                 }
-                x -= 1;
+                3 => {
+                    if c.is_ascii_digit() {
+                        state = 3;
+                    } else if is_e(c) {
+                        state = 4;
+                    } else if is_dot(c) {
+                        state = 7;
+                    } else {
+                        return false;
+                    }
+                }
+                4 => {
+                    if c.is_ascii_digit() {
+                        i -= 1;
+                        state = 5;
+                    } else if is_sign(c) {
+                        state = 5;
+                    } else {
+                        return false;
+                    }
+                }
+                5 | 6 => {
+                    if c.is_ascii_digit() {
+                        state = 6;
+                    } else {
+                        return false;
+                    }
+                }
+                7 => {
+                    if c.is_ascii_digit() {
+                        state = 8;
+                    } else {
+                        return false;
+                    }
+                }
+                8 => {
+                    if c.is_ascii_digit() {
+                        state = 8;
+                    } else if is_e(c) {
+                        state = 4;
+                    } else {
+                        return false;
+                    }
+                }
+                _ => panic!("Illegal state!")
             }
         }
-        for j in 1..n {
-            let mut y = j;
-            for i in (0..m).rev() {
-                if y < nums[i].len() {
-                    result.push(nums[i][y]);
-                }
-                y += 1;
-                if y >= n {
-                    break;
-                }
-            }
-        }
-        result
+        state == 3 || state == 6 || state == 7 || state == 8
     }
 }
 
 fn main() {
-    let matrix = vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 9]];
-    assert_eq!(vec![1, 4, 2, 7, 5, 3, 8, 6, 9], Solution::find_diagonal_order(matrix));
-    let matrix = vec![
-        vec![1, 2, 3, 4, 5],
-        vec![6, 7],
-        vec![8],
-        vec![9, 10, 11],
-        vec![12, 13, 14, 15, 16]];
-    assert_eq!(vec![1, 6, 2, 8, 7, 3, 9, 4, 12, 10, 5, 13, 11, 14, 15, 16],
-               Solution::find_diagonal_order(matrix));
-    let matrix = vec![
-        vec![1, 2, 3],
-        vec![4],
-        vec![5, 6, 7],
-        vec![8],
-        vec![9, 10, 11]];
-    assert_eq!(vec![1, 4, 2, 5, 3, 8, 6, 9, 7, 10, 11], Solution::find_diagonal_order(matrix));
-    let matrix = vec![vec![1, 2, 3, 4, 5, 6]];
-    assert_eq!(vec![1, 2, 3, 4, 5, 6], Solution::find_diagonal_order(matrix));
+    assert!(Solution::is_number("+100".to_string()));
+    assert!(Solution::is_number("5e2".to_string()));
+    assert!(Solution::is_number("-123".to_string()));
+    assert!(Solution::is_number("3.1416".to_string()));
+    assert!(Solution::is_number("-1E-16".to_string()));
+    assert!(Solution::is_number("0123".to_string()));
+    assert!(!Solution::is_number("12e".to_string()));
+    assert!(!Solution::is_number("1a3.14".to_string()));
+    assert!(!Solution::is_number("1.2.3".to_string()));
+    assert!(!Solution::is_number("+-5".to_string()));
+    assert!(!Solution::is_number("12e+5.4".to_string()));
+    assert!(Solution::is_number("1".to_string()));
+    assert!(Solution::is_number("1 ".to_string()));
+    assert!(Solution::is_number(" 1 ".to_string()));
+    assert!(Solution::is_number(" .1 ".to_string()));
+    assert!(!Solution::is_number(" .1. ".to_string()));
+    assert!(Solution::is_number(" 1. ".to_string()));
+    assert!(!Solution::is_number(" . ".to_string()));
 }
