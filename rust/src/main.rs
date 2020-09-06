@@ -3,42 +3,44 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn validate_stack_sequences(pushed: Vec<i32>, popped: Vec<i32>) -> bool {
-        assert_eq!(pushed.len(), popped.len());
-        let n = pushed.len();
-        if n == 0 {
+    pub fn verify_postorder(postorder: Vec<i32>) -> bool {
+        if postorder.len() < 1 {
             return true;
         }
-        let mut stack = vec![];
-        let mut x = 0;
-        for pop in popped {
-            if let Some(&v) = stack.last() {
-                if v == pop {
-                    stack.pop();
-                    continue;
-                }
+        fn verify_postorder(postorder: &[i32]) -> bool {
+            let n = postorder.len();
+            if n <= 1 {
+                return true;
             }
-            let mut is_found = false;
-            while x < n {
-                if pop != pushed[x] {
-                    stack.push(pushed[x]);
-                    x += 1;
-                } else {
-                    is_found = true;
-                    x += 1;
+            let root = postorder[n - 1];
+            let mut i = 0;
+            while i < n {
+                if postorder[i] >= root {
                     break;
                 }
+                i += 1;
             }
-            if !is_found {
-                return false;
+            for j in i + 1..n {
+                if postorder[j] < root {
+                    return false;
+                }
             }
+            let mut verify_left = true;
+            if i > 0 {
+                verify_left = verify_postorder(&postorder[0..i]);
+            }
+            let mut verify_right = true;
+            if i < n {
+                verify_right = verify_postorder(&postorder[i..n - 1]);
+            }
+            verify_left && verify_right
         }
-        stack.is_empty()
+        verify_postorder(postorder.as_slice())
     }
 }
 
 fn main() {
-    assert!(Solution::validate_stack_sequences(vec![1, 2, 3, 4, 5], vec![4, 5, 3, 2, 1]));
-    assert!(!Solution::validate_stack_sequences(vec![1, 2, 3, 4, 5], vec![4, 3, 5, 1, 2]));
-    assert!(Solution::validate_stack_sequences(vec![1], vec![1]));
+    assert!(!Solution::verify_postorder(vec![1, 6, 3, 2, 5]));
+    assert!(Solution::verify_postorder(vec![1, 3, 2, 6, 5]));
+    assert!(Solution::verify_postorder(vec![5, 4, 3, 2, 1]));
 }
