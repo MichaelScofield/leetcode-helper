@@ -1,56 +1,44 @@
 mod helper;
 
-struct MinStack {
-    data_stack: Vec<i32>,
-    min_stack: Vec<i32>,
-}
+struct Solution;
 
-impl MinStack {
-    fn new() -> Self {
-        MinStack {
-            data_stack: Vec::new(),
-            min_stack: Vec::new(),
+impl Solution {
+    pub fn validate_stack_sequences(pushed: Vec<i32>, popped: Vec<i32>) -> bool {
+        assert_eq!(pushed.len(), popped.len());
+        let n = pushed.len();
+        if n == 0 {
+            return true;
         }
-    }
-
-    fn push(&mut self, x: i32) {
-        self.data_stack.push(x);
-        if let Some(&min) = self.min_stack.last() {
-            if min < x {
-                self.min_stack.push(min);
-                return;
+        let mut stack = vec![];
+        let mut x = 0;
+        for pop in popped {
+            if let Some(&v) = stack.last() {
+                if v == pop {
+                    stack.pop();
+                    continue;
+                }
+            }
+            let mut is_found = false;
+            while x < n {
+                if pop != pushed[x] {
+                    stack.push(pushed[x]);
+                    x += 1;
+                } else {
+                    is_found = true;
+                    x += 1;
+                    break;
+                }
+            }
+            if !is_found {
+                return false;
             }
         }
-        self.min_stack.push(x);
-    }
-
-    fn pop(&mut self) {
-        self.data_stack.pop();
-        self.min_stack.pop();
-    }
-
-    fn top(&mut self) -> i32 {
-        if let Some(&x) = self.data_stack.last() {
-            return x;
-        }
-        panic!("Illegal State!")
-    }
-
-    fn get_min(&self) -> i32 {
-        if let Some(&min) = self.min_stack.last() {
-            return min;
-        }
-        panic!("Illegal State!")
+        stack.is_empty()
     }
 }
 
 fn main() {
-    let min_stack = &mut MinStack::new();
-    min_stack.push(-2);
-    min_stack.push(0);
-    min_stack.push(-3);
-    assert_eq!(-3, min_stack.get_min());
-    min_stack.pop();
-    assert_eq!(0, min_stack.top());
-    assert_eq!(-2, min_stack.get_min());
+    assert!(Solution::validate_stack_sequences(vec![1, 2, 3, 4, 5], vec![4, 5, 3, 2, 1]));
+    assert!(!Solution::validate_stack_sequences(vec![1, 2, 3, 4, 5], vec![4, 3, 5, 1, 2]));
+    assert!(Solution::validate_stack_sequences(vec![1], vec![1]));
 }
