@@ -1,47 +1,91 @@
-import java.util.ArrayList;
-import java.util.List;
-
 public class Solution {
 
-    public List<List<Integer>> pathSum(TreeNode root, int sum) {
-        if (root == null) {
-            return new ArrayList<>(1);
+    static class Node {
+        int val;
+        Node next;
+        Node random;
+
+        public Node(int val) {
+            this.val = val;
+            this.next = null;
+            this.random = null;
         }
-        List<List<Integer>> paths = new ArrayList<>();
-        List<Integer> path = new ArrayList<>();
-        path.add(root.val);
-        pathSum(root, sum - root.val, path, paths);
-        return paths;
     }
 
-    void pathSum(TreeNode root, int sum, List<Integer> path, List<List<Integer>> paths) {
-        if (sum == 0 && root.left == null && root.right == null) {
-            paths.add(new ArrayList<>(path));
-            return;
+    public Node copyRandomList(Node head) {
+        if (head == null) {
+            return null;
         }
-        if (root.left != null) {
-            path.add(root.left.val);
-            pathSum(root.left, sum - root.left.val, path, paths);
-            path.remove(path.size() - 1);
+        linkedClone(head);
+        linkRandoms(head);
+        return splitList(head);
+    }
+
+    void linkedClone(Node head) {
+        while (head != null) {
+            Node node = new Node(head.val);
+            node.next = head.next;
+            head.next = node;
+            head = node.next;
         }
-        if (root.right != null) {
-            path.add(root.right.val);
-            pathSum(root.right, sum - root.right.val, path, paths);
-            path.remove(path.size() - 1);
+    }
+
+    void linkRandoms(Node head) {
+        while (head != null) {
+            if (head.random != null) {
+                head.next.random = head.random.next;
+            }
+            head = head.next.next;
         }
+    }
+
+    Node splitList(Node head) {
+        Node dummy1 = new Node(0);
+        Node dummy2 = new Node(0);
+        Node newHead = dummy2;
+        int i = 0;
+        while (head != null) {
+            if (i++ % 2 == 0) {
+                dummy1.next = head;
+                dummy1 = head;
+            } else {
+                dummy2.next = head;
+                dummy2 = head;
+            }
+            head = head.next;
+        }
+        dummy1.next = null;
+        return newHead.next;
     }
 
     public static void main(String[] args) {
         Solution solution = new Solution();
-        TreeNode root;
 
-        root = TreeNode.createTree(new Integer[]{5, 4, 8, 11, null, 13, 4, 7, 2, null, null, 5, 1});
-        System.out.println(solution.pathSum(root, 22));
+        Node n1 = new Node(7);
+        Node n2 = new Node(13);
+        Node n3 = new Node(11);
+        Node n4 = new Node(10);
+        Node n5 = new Node(1);
+        n1.next = n2;
+        n2.next = n3;
+        n3.next = n4;
+        n4.next = n5;
+        n2.random = n1;
+        n3.random = n5;
+        n4.random = n3;
+        n5.random = n1;
 
-        root = TreeNode.createTree(new Integer[]{5});
-        System.out.println(solution.pathSum(root, 22));
-
-        root = TreeNode.createTree(new Integer[]{5});
-        System.out.println(solution.pathSum(root, 5));
+        Node head = n1;
+        Node newHead = solution.copyRandomList(n1);
+        StringBuilder sb1 = new StringBuilder();
+        StringBuilder sb2 = new StringBuilder();
+        while (head != null && newHead != null) {
+            sb1.append("(").append(head.val).append(",").append(head.random == null ? "null" : head.random.val).append(") -> ");
+            sb2.append("(").append(newHead.val).append(",").append(newHead.random == null ? "null" : newHead.random.val).append(") -> ");
+            head = head.next;
+            newHead = newHead.next;
+        }
+        System.out.println(sb1.toString());
+        System.out.println(sb2.toString());
     }
 }
