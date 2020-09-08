@@ -3,44 +3,48 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn verify_postorder(postorder: Vec<i32>) -> bool {
-        if postorder.len() < 1 {
-            return true;
+    pub fn erase_overlap_intervals(intervals: Vec<Vec<i32>>) -> i32 {
+        let intervals = &mut { intervals };
+        let n = intervals.len();
+        if n <= 1 {
+            return 0;
         }
-        fn verify_postorder(postorder: &[i32]) -> bool {
-            let n = postorder.len();
-            if n <= 1 {
-                return true;
+
+        use std::cmp::Ordering;
+        intervals.sort_by(|a, b| {
+            assert!(a.len() == 2 && b.len() == 2 && a[1] > a[0] && b[1] > b[0]);
+            match a[1].cmp(&b[1]) {
+                Ordering::Equal => a[0].cmp(&b[0]),
+                ordering => ordering
             }
-            let root = postorder[n - 1];
-            let mut i = 0;
-            while i < n {
-                if postorder[i] >= root {
-                    break;
-                }
-                i += 1;
+        });
+
+        let mut erased = 0;
+        let mut i = 0;
+        let mut j = 1;
+        while j < n {
+            if intervals[i][1] <= intervals[j][0] {
+                i = j;
+            } else {
+                erased += 1;
             }
-            for j in i + 1..n {
-                if postorder[j] < root {
-                    return false;
-                }
-            }
-            let mut verify_left = true;
-            if i > 0 {
-                verify_left = verify_postorder(&postorder[0..i]);
-            }
-            let mut verify_right = true;
-            if i < n {
-                verify_right = verify_postorder(&postorder[i..n - 1]);
-            }
-            verify_left && verify_right
+            j += 1;
         }
-        verify_postorder(postorder.as_slice())
+        erased
     }
 }
 
 fn main() {
-    assert!(!Solution::verify_postorder(vec![1, 6, 3, 2, 5]));
-    assert!(Solution::verify_postorder(vec![1, 3, 2, 6, 5]));
-    assert!(Solution::verify_postorder(vec![5, 4, 3, 2, 1]));
+    let intervals = vecvec![[1,2],[2,3],[3,4],[1,3]];
+    assert_eq!(1, Solution::erase_overlap_intervals(intervals));
+    let intervals = vecvec![[1,2],[1,2],[1,2]];
+    assert_eq!(2, Solution::erase_overlap_intervals(intervals));
+    let intervals = vecvec![[1,2],[2,3]];
+    assert_eq!(0, Solution::erase_overlap_intervals(intervals));
+    let intervals = vecvec![[1,9],[1,5],[5,9]];
+    assert_eq!(1, Solution::erase_overlap_intervals(intervals));
+    let intervals = vecvec![[0,2],[1,3],[2,4],[3,5],[4,6]];
+    assert_eq!(2, Solution::erase_overlap_intervals(intervals));
+    let intervals = vecvec![[0,100],[99,101],[100,200]];
+    assert_eq!(1, Solution::erase_overlap_intervals(intervals));
 }

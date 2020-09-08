@@ -1,6 +1,24 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
+#[macro_export]
+macro_rules! vecvec {
+    () => (
+        Vec::with_capacity(0)
+    );
+    ($([ $($x:expr),* ]),*) => ({
+        let mut _vv = Vec::new();
+        $(
+            let mut _v = Vec::new();
+            $(
+                _v.push($x);
+            )*
+            _vv.push(_v);
+        )*
+        _vv
+    })
+}
+
 // Definition for a binary tree node.
 #[derive(Debug, PartialEq, Eq)]
 pub struct TreeNode {
