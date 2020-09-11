@@ -3,35 +3,38 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn find_min_arrow_shots(points: Vec<Vec<i32>>) -> i32 {
-        let points = &mut { points };
-        let n = points.len();
-        if n <= 1 {
-            return n as i32;
+    pub fn next_greater_elements(nums: Vec<i32>) -> Vec<i32> {
+        let l = nums.len();
+        if l == 0 {
+            return vec![];
         }
-
-        points.sort_by(|a, b| {
-            assert!(a.len() == 2 && b.len() == 2 && a[1] > a[0] && b[1] > b[0]);
-            a[1].cmp(&b[1])
-        });
-
-        let mut arrows = 1;
-        let mut i = 0;
-        let mut j = 1;
-        while j < n {
-            if points[i][1] < points[j][0] {
-                i = j;
-                arrows += 1;
+        let mut ans = vec![0; l];
+        let mut stack = vec![];
+        for i in (0..l * 2).rev() {
+            let num = nums[i % l];
+            while let Some(&last) = stack.last() {
+                if last <= num {
+                    stack.pop();
+                } else {
+                    break;
+                }
             }
-            j += 1;
+            if i < l {
+                ans[i] = if let Some(&last) = stack.last() {
+                    last
+                } else {
+                    -1
+                };
+            }
+            stack.push(num);
         }
-        arrows
+        ans
     }
 }
 
 fn main() {
-    let points = vecvec![[10,16], [2,8], [1,6], [7,12]];
-    assert_eq!(2, Solution::find_min_arrow_shots(points));
-    let points = vecvec![[1,2],[2,3],[3,4],[4,5]];
-    assert_eq!(2, Solution::find_min_arrow_shots(points));
+    assert_eq!(vec![2, -1, 2], Solution::next_greater_elements(vec![1, 2, 1]));
+    assert_eq!(vec![2, 3, -1], Solution::next_greater_elements(vec![1, 2, 3]));
+    assert_eq!(vec![-1, 3, 3], Solution::next_greater_elements(vec![3, 2, 1]));
+    assert_eq!(vec![-1], Solution::next_greater_elements(vec![1]));
 }
