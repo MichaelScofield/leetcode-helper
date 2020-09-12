@@ -3,38 +3,50 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn next_greater_elements(nums: Vec<i32>) -> Vec<i32> {
-        let l = nums.len();
-        if l == 0 {
+    pub fn get_least_numbers(arr: Vec<i32>, k: i32) -> Vec<i32> {
+        let len = arr.len();
+        if len == 0 || k <= 0 || k > len as i32 {
             return vec![];
         }
-        let mut ans = vec![0; l];
-        let mut stack = vec![];
-        for i in (0..l * 2).rev() {
-            let num = nums[i % l];
-            while let Some(&last) = stack.last() {
-                if last <= num {
-                    stack.pop();
+        let k = k as usize;
+        if k == len {
+            return arr;
+        }
+        fn partition(arr: &mut Vec<i32>, low: usize, high: usize) -> usize {
+            let pivot = arr[low];
+            let mut i = low + 1;
+            let mut j = high;
+            while i <= j {
+                if arr[i] > pivot {
+                    arr.swap(i, j);
+                    j -= 1;
                 } else {
-                    break;
+                    i += 1;
                 }
             }
-            if i < l {
-                ans[i] = if let Some(&last) = stack.last() {
-                    last
-                } else {
-                    -1
-                };
-            }
-            stack.push(num);
+            arr.swap(low, j);
+            j
         }
-        ans
+        let mut low = 0;
+        let mut high = len - 1;
+        let arr = &mut { arr };
+        while low <= high {
+            let p = partition(arr, low, high);
+            if p == k {
+                return arr.as_slice()[0..p].to_vec();
+            }
+            if p < k {
+                low = p + 1;
+            } else {
+                high = p - 1;
+            }
+        }
+        vec![]
     }
 }
 
 fn main() {
-    assert_eq!(vec![2, -1, 2], Solution::next_greater_elements(vec![1, 2, 1]));
-    assert_eq!(vec![2, 3, -1], Solution::next_greater_elements(vec![1, 2, 3]));
-    assert_eq!(vec![-1, 3, 3], Solution::next_greater_elements(vec![3, 2, 1]));
-    assert_eq!(vec![-1], Solution::next_greater_elements(vec![1]));
+    assert_eq!(vec![1, 2], Solution::get_least_numbers(vec![3, 2, 1], 2));
+    assert_eq!(vec![0], Solution::get_least_numbers(vec![0, 1, 2, 1], 1));
+    assert_eq!(vec![1, 2, 3, 4], Solution::get_least_numbers(vec![4, 5, 1, 6, 2, 7, 3, 8], 4));
 }
