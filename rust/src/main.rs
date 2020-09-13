@@ -3,27 +3,22 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn translate_num(num: i32) -> i32 {
-        assert!(num >= 0);
-        let num = num.to_string();
-        let chars: Vec<u32> = num.chars().map(|c| c.to_digit(10).unwrap()).collect();
-        let len = chars.len();
-        let mut dp = vec![0; len + 1];
-        dp[1] = 1;
-        for i in 2..=len {
-            dp[i] = dp[i - 1];
-            let x = chars[i - 2] * 10 + chars[i - 1];
-            if x <= 25 && x >= 10 {
-                dp[i] += std::cmp::max(dp[i - 2], 1);
+    pub fn max_value(grid: Vec<Vec<i32>>) -> i32 {
+        let m = grid.len();
+        assert!(m > 0);
+        let n = grid[0].len();
+        assert!(n > 0);
+        let mut dp = vec![vec![0; n + 1]; m + 1];
+        for i in 1..=m {
+            for j in 1..=n {
+                let value = grid[i - 1][j - 1];
+                dp[i][j] = std::cmp::max(dp[i - 1][j], dp[i][j - 1]) + value;
             }
         }
-        dp[len]
+        dp[m][n]
     }
 }
 
 fn main() {
-    assert_eq!(2, Solution::translate_num(18580));
-    assert_eq!(2, Solution::translate_num(25));
-    assert_eq!(1, Solution::translate_num(0));
-    assert_eq!(5, Solution::translate_num(12258));
+    assert_eq!(12, Solution::max_value(vecvec![[1,3,1],[1,5,1],[4,2,1]]));
 }
