@@ -1,55 +1,50 @@
-import java.util.Arrays;
-import java.util.LinkedList;
+import java.util.Comparator;
+import java.util.PriorityQueue;
 
 public class Solution {
 
-    public String serialize(TreeNode root) {
-        if (root == null) {
-            return "";
-        }
-        StringBuilder sb = new StringBuilder();
-        serialize(root, sb);
-        return sb.toString();
-    }
+    static class MedianFinder {
 
-    void serialize(TreeNode node, StringBuilder sb) {
-        if (node == null) {
-            sb.append("x ");
-            return;
-        }
-        sb.append(node.val).append(" ");
-        serialize(node.left, sb);
-        serialize(node.right, sb);
-    }
+        double median;
+        int total = 0;
+        PriorityQueue<Integer> minHeap;
+        PriorityQueue<Integer> maxHeap;
 
-    public TreeNode deserialize(String data) {
-        if (data == null || data.isEmpty()) {
-            return null;
+        public MedianFinder() {
+            minHeap = new PriorityQueue<>(Comparator.naturalOrder());
+            maxHeap = new PriorityQueue<>(Comparator.reverseOrder());
         }
-        LinkedList<String> vals = Arrays.stream(data.trim().split(" ")).collect(LinkedList::new, LinkedList::offer, LinkedList::addAll);
-        return deserialize(vals);
-    }
 
-    TreeNode deserialize(LinkedList<String> vals) {
-        if (vals.size() == 0) {
-            return null;
+        public void addNum(int num) {
+            if (total % 2 == 0) {
+                minHeap.add(num);
+                Integer min = minHeap.poll();
+                maxHeap.add(min);
+
+                //noinspection ConstantConditions
+                median = maxHeap.peek();
+            } else {
+                maxHeap.add(num);
+                Integer max = maxHeap.poll();
+                minHeap.add(max);
+
+                //noinspection ConstantConditions
+                median = (minHeap.peek() + (maxHeap.peek() == null ? 0 : maxHeap.peek())) / 2.0;
+            }
+            total += 1;
         }
-        String val = vals.poll();
-        if (val.equals("x")) {
-            return null;
+
+        public double findMedian() {
+            return median;
         }
-        TreeNode node = new TreeNode(Integer.parseInt(val));
-        node.left = deserialize(vals);
-        node.right = deserialize(vals);
-        return node;
     }
 
     public static void main(String[] args) {
-        Solution solution = new Solution();
-        TreeNode root = TreeNode.createTree(new Integer[]{1, 2, 3, null, null, 4, 5});
-        String data = solution.serialize(root);
-        System.out.println(data);
-        root = solution.deserialize(data);
-        TreeNode.printTree(root);
+        MedianFinder finder = new MedianFinder();
+        finder.addNum(1);
+        finder.addNum(2);
+        System.out.println(finder.findMedian() == 1.5);
+        finder.addNum(3);
+        System.out.println(finder.findMedian() == 2);
     }
 }
