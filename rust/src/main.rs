@@ -3,22 +3,38 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn max_value(grid: Vec<Vec<i32>>) -> i32 {
-        let m = grid.len();
-        assert!(m > 0);
-        let n = grid[0].len();
-        assert!(n > 0);
-        let mut dp = vec![vec![0; n + 1]; m + 1];
-        for i in 1..=m {
-            for j in 1..=n {
-                let value = grid[i - 1][j - 1];
-                dp[i][j] = std::cmp::max(dp[i - 1][j], dp[i][j - 1]) + value;
-            }
+    pub fn length_of_longest_substring(s: String) -> i32 {
+        if s.len() == 0 {
+            return 0;
         }
-        dp[m][n]
+        let mut longest = 1;
+        let chars: Vec<char> = s.chars().collect();
+        let n = chars.len();
+        let mut dp = vec![0; n];
+        dp[0] = 1;
+        for i in 1..n {
+            let mut dup = None;
+            for j in i - dp[i - 1]..i {
+                if chars[j] == chars[i] {
+                    dup = Some(j);
+                    break;
+                }
+            }
+            if let Some(index) = dup {
+                dp[i] = i - index;
+            } else {
+                dp[i] = dp[i - 1] + 1;
+            }
+            longest = std::cmp::max(longest, dp[i]);
+        }
+        longest as i32
     }
 }
 
 fn main() {
-    assert_eq!(12, Solution::max_value(vecvec![[1,3,1],[1,5,1],[4,2,1]]));
+    assert_eq!(1, Solution::length_of_longest_substring(" ".to_string()));
+    assert_eq!(3, Solution::length_of_longest_substring("abcabcbb".to_string()));
+    assert_eq!(1, Solution::length_of_longest_substring("bbbbb".to_string()));
+    assert_eq!(3, Solution::length_of_longest_substring("pwwkew".to_string()));
+    assert_eq!(0, Solution::length_of_longest_substring("".to_string()));
 }
