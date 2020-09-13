@@ -3,38 +3,23 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn length_of_longest_substring(s: String) -> i32 {
+    pub fn first_uniq_char(s: String) -> i32 {
         if s.len() == 0 {
-            return 0;
+            return -1;
         }
-        let mut longest = 1;
-        let chars: Vec<char> = s.chars().collect();
-        let n = chars.len();
-        let mut dp = vec![0; n];
-        dp[0] = 1;
-        for i in 1..n {
-            let mut dup = None;
-            for j in i - dp[i - 1]..i {
-                if chars[j] == chars[i] {
-                    dup = Some(j);
-                    break;
-                }
-            }
-            if let Some(index) = dup {
-                dp[i] = i - index;
-            } else {
-                dp[i] = dp[i - 1] + 1;
-            }
-            longest = std::cmp::max(longest, dp[i]);
+        let chars = s.as_bytes();
+        let mut index = vec![(0, -1); 26];
+        for i in 0..chars.len() {
+            let offset = (chars[i] - 97) as usize;
+            index[offset].0 += 1;
+            index[offset].1 = i as i32;
         }
-        longest as i32
+        index.iter().filter(|(count, _)| *count == 1).map(|(_, pos)| *pos).min().unwrap_or(-1)
     }
 }
 
 fn main() {
-    assert_eq!(1, Solution::length_of_longest_substring(" ".to_string()));
-    assert_eq!(3, Solution::length_of_longest_substring("abcabcbb".to_string()));
-    assert_eq!(1, Solution::length_of_longest_substring("bbbbb".to_string()));
-    assert_eq!(3, Solution::length_of_longest_substring("pwwkew".to_string()));
-    assert_eq!(0, Solution::length_of_longest_substring("".to_string()));
+    assert_eq!(-1, Solution::first_uniq_char("cc".to_string()));
+    assert_eq!(0, Solution::first_uniq_char("leetcode".to_string()));
+    assert_eq!(2, Solution::first_uniq_char("loveleetcode".to_string()));
 }
