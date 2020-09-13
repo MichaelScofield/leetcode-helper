@@ -3,29 +3,27 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn min_number(nums: Vec<i32>) -> String {
-        if nums.len() == 0 {
-            return "".to_string();
+    pub fn translate_num(num: i32) -> i32 {
+        assert!(num >= 0);
+        let num = num.to_string();
+        let chars: Vec<u32> = num.chars().map(|c| c.to_digit(10).unwrap()).collect();
+        let len = chars.len();
+        let mut dp = vec![0; len + 1];
+        dp[1] = 1;
+        for i in 2..=len {
+            dp[i] = dp[i - 1];
+            let x = chars[i - 2] * 10 + chars[i - 1];
+            if x <= 25 && x >= 10 {
+                dp[i] += std::cmp::max(dp[i - 2], 1);
+            }
         }
-        let nums = &mut { nums };
-        nums.sort_unstable_by(|&a, &b| {
-            let a = a.to_string();
-            let b = b.to_string();
-            let mut ab = a.clone();
-            ab.push_str(&b);
-            let mut ba = b.clone();
-            ba.push_str(&a);
-            ab.cmp(&ba)
-        });
-        let mut s = String::new();
-        for num in nums {
-            s.push_str(&num.to_string());
-        }
-        s
+        dp[len]
     }
 }
 
 fn main() {
-    assert_eq!("102".to_string(), Solution::min_number(vec![2, 10]));
-    assert_eq!("3033459".to_string(), Solution::min_number(vec![3, 30, 34, 5, 9]));
+    assert_eq!(2, Solution::translate_num(18580));
+    assert_eq!(2, Solution::translate_num(25));
+    assert_eq!(1, Solution::translate_num(0));
+    assert_eq!(5, Solution::translate_num(12258));
 }
