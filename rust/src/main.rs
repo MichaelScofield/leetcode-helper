@@ -3,50 +3,26 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn get_least_numbers(arr: Vec<i32>, k: i32) -> Vec<i32> {
-        let len = arr.len();
-        if len == 0 || k <= 0 || k > len as i32 {
-            return vec![];
+    pub fn max_sub_array(nums: Vec<i32>) -> i32 {
+        if nums.len() == 0 {
+            return 0;
         }
-        let k = k as usize;
-        if k == len {
-            return arr;
+        let n = nums.len();
+        // dp[i][0]: i nums, max sub array ends in nums[i]
+        // dp[i][1]: i nums, max sub array NOT ends in nums[i]
+        let mut dp = vec![vec![0; 2]; n];
+        dp[0][0] = nums[0];
+        dp[0][1] = std::i32::MIN;
+        for i in 1..n {
+            let num = nums[i];
+            dp[i][0] = std::cmp::max(dp[i - 1][0] + num, num);
+            dp[i][1] = std::cmp::max(dp[i - 1][0], dp[i - 1][1]);
         }
-        fn partition(arr: &mut Vec<i32>, low: usize, high: usize) -> usize {
-            let pivot = arr[low];
-            let mut i = low + 1;
-            let mut j = high;
-            while i <= j {
-                if arr[i] > pivot {
-                    arr.swap(i, j);
-                    j -= 1;
-                } else {
-                    i += 1;
-                }
-            }
-            arr.swap(low, j);
-            j
-        }
-        let mut low = 0;
-        let mut high = len - 1;
-        let arr = &mut { arr };
-        while low <= high {
-            let p = partition(arr, low, high);
-            if p == k {
-                return arr.as_slice()[0..p].to_vec();
-            }
-            if p < k {
-                low = p + 1;
-            } else {
-                high = p - 1;
-            }
-        }
-        vec![]
+        std::cmp::max(dp[n - 1][0], dp[n - 1][1])
     }
 }
 
 fn main() {
-    assert_eq!(vec![1, 2], Solution::get_least_numbers(vec![3, 2, 1], 2));
-    assert_eq!(vec![0], Solution::get_least_numbers(vec![0, 1, 2, 1], 1));
-    assert_eq!(vec![1, 2, 3, 4], Solution::get_least_numbers(vec![4, 5, 1, 6, 2, 7, 3, 8], 4));
+    assert_eq!(6, Solution::max_sub_array(vec![-2, 1, -3, 4, -1, 2, 1, -5, 4]));
+    assert_eq!(-1, Solution::max_sub_array(vec![-1]));
 }
