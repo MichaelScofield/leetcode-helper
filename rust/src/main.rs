@@ -1,130 +1,120 @@
-use std::cmp::Ordering;
-use std::collections::{HashMap, HashSet};
-use std::time::Instant;
-
 mod helper;
 
-struct Twitter {
-    relation: HashMap<i32, HashSet<i32>>,
-    tweets: HashMap<i32, Vec<Tweet>>,
-}
+struct Solution;
 
-#[derive(Eq, PartialEq)]
-struct Tweet {
-    tweet_id: i32,
-    tweet_time: Instant,
-}
-
-impl PartialOrd for Tweet {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        let order = other.tweet_time.partial_cmp(&self.tweet_time);
-        if let Some(Ordering::Equal) = order {
-            other.tweet_id.partial_cmp(&self.tweet_id)
-        } else {
-            order
-        }
-    }
-}
-
-impl Ord for Tweet {
-    fn cmp(&self, other: &Self) -> Ordering {
-        let order = other.tweet_time.cmp(&self.tweet_time);
-        if Ordering::Equal == order {
-            other.tweet_id.cmp(&self.tweet_id)
-        } else {
-            order
-        }
-    }
-}
-
-struct Feed<'a> {
-    recent_tweets: Vec<&'a Tweet>,
-}
-
-impl<'a> Feed<'a> {
-    fn new() -> Self {
-        Feed { recent_tweets: Vec::with_capacity(10) }
-    }
-
-    fn insert_tweets(&mut self, tweets: &'a Vec<Tweet>) {
-        for tweet in tweets.iter() {
-            if self.recent_tweets.len() == 10 {
-                if self.recent_tweets.last().expect("illegal state").lt(&tweet) {
-                    continue;
-                }
-                self.recent_tweets.pop();
+impl Solution {
+    pub fn solve_sudoku(board: &mut Vec<Vec<char>>) {
+        assert!(board.len() == 9 && board.iter().filter(|row| row.len() != 9).count() == 0);
+        let num_board = board.iter()
+            .map(|row| row.iter()
+                .map(|&c| c.to_digit(10).unwrap_or(0))
+                .collect::<Vec<u32>>())
+            .collect::<Vec<Vec<u32>>>();
+        let mut num_board_clone = num_board.clone();
+        fn next_empty_cell(board: &Vec<Vec<u32>>, (i, j): (usize, usize)) -> Option<(usize, usize)> {
+            if i == 0 && j == 0 && board[i][j] == 0 {
+                return Some((i, j));
             }
-            self.recent_tweets.push(tweet);
-            self.recent_tweets.sort();
-        }
-    }
-}
-
-impl Twitter {
-    fn new() -> Self {
-        Twitter {
-            relation: HashMap::new(),
-            tweets: HashMap::new(),
-        }
-    }
-
-    fn post_tweet(&mut self, user_id: i32, tweet_id: i32) {
-        let tweet = Tweet { tweet_id, tweet_time: Instant::now() };
-        self.tweets.entry(user_id).or_insert_with(|| Vec::new()).push(tweet);
-    }
-
-    fn get_news_feed(&self, user_id: i32) -> Vec<i32> {
-        let mut feed = Feed::new();
-        if let Some(tweets) = self.tweets.get(&user_id) {
-            feed.insert_tweets(tweets);
-        }
-
-        if let Some(followers) = self.relation.get(&user_id) {
-            for follower in followers.iter() {
-                let tweets = self.tweets.get(follower);
-                if let Some(tweets) = tweets {
-                    feed.insert_tweets(tweets)
+            let (mut i, mut j) = (i, j);
+            loop {
+                if i == 8 && j == 8 {
+                    return None;
+                }
+                if j == 8 {
+                    i += 1;
+                    j = 0;
+                } else {
+                    j += 1;
+                }
+                if board[i][j] == 0 {
+                    break;
                 }
             }
+            Some((i, j))
         }
-        feed.recent_tweets.iter().map(|&tweet| tweet.tweet_id).collect()
-    }
-
-    fn follow(&mut self, follower_id: i32, followee_id: i32) {
-        if follower_id == followee_id {
-            return;
+        fn can_place(board: &Vec<Vec<u32>>, (i, j): (usize, usize), d: u32) -> bool {
+            for x in (0..i).chain(i + 1..9) {
+                if board[x][j] == d {
+                    return false;
+                }
+            }
+            for y in (0..j).chain(j + 1..9) {
+                if board[i][y] == d {
+                    return false;
+                }
+            }
+            let (sub_board_start_i, sub_board_start_j) = (i / 3 * 3, j / 3 * 3);
+            for x in sub_board_start_i..sub_board_start_i + 3 {
+                for y in sub_board_start_j..sub_board_start_j + 3 {
+                    if board[x][y] == d {
+                        return false;
+                    }
+                }
+            }
+            true
         }
-        self.relation.entry(follower_id).or_insert_with(|| HashSet::new()).insert(followee_id);
-    }
-
-    fn unfollow(&mut self, follower_id: i32, followee_id: i32) {
-        if follower_id == followee_id {
-            return;
+        fn solve_sudoku(board: &Vec<Vec<u32>>, board_clone: &mut Vec<Vec<u32>>,
+                        (i, j): (usize, usize)) -> bool {
+            if let Some((i, j)) = next_empty_cell(board_clone, (i, j)) {
+                for d in 1..=9 {
+                    if !can_place(board_clone, (i, j), d) {
+                        continue;
+                    }
+                    board_clone[i][j] = d;
+                    if solve_sudoku(board, board_clone, (i, j)) {
+                        return true;
+                    }
+                    board_clone[i][j] = 0;
+                }
+                false
+            } else {
+                true
+            }
         }
-        let relation = self.relation.get_mut(&follower_id);
-        if let Some(relation) = relation {
-            relation.remove(&followee_id);
+        solve_sudoku(&num_board, &mut num_board_clone, (0, 0));
+        for i in 0..9 {
+            for j in 0..9 {
+                if board[i][j] == '.' {
+                    board[i][j] = std::char::from_digit(num_board_clone[i][j], 10).unwrap();
+                }
+            }
         }
     }
 }
 
 fn main() {
-    let mut twitter = Twitter::new();
-    twitter.post_tweet(1, 5);
-    assert_eq!(vec![5], twitter.get_news_feed(1));
-    twitter.follow(1, 2);
-    twitter.post_tweet(2, 6);
-    assert_eq!(vec![6, 5], twitter.get_news_feed(1));
-    twitter.unfollow(1, 2);
-    twitter.unfollow(1, 3);
-    assert_eq!(vec![5], twitter.get_news_feed(1));
-    for i in 10..100 {
-        twitter.post_tweet(2, i);
+    let board = &mut vecvec![
+        ['5','3','.',  '.','7','.',  '.','.','.'],
+        ['6','.','.',  '1','9','5',  '.','.','.'],
+        ['.','9','8',  '.','.','.',  '.','6','.'],
+
+        ['8','.','.',  '.','6','.',  '.','.','3'],
+        ['4','.','.',  '8','.','3',  '.','.','1'],
+        ['7','.','.',  '.','2','.',  '.','.','6'],
+
+        ['.','6','.',  '.','.','.',  '2','8','.'],
+        ['.','.','.',  '4','1','9',  '.','.','5'],
+        ['.','.','.',  '.','8','.',  '.','7','9']
+        ];
+    Solution::solve_sudoku(board);
+    for row in board.iter() {
+        println!("{:?}", row);
     }
-    twitter.follow(1, 2);
-    assert_eq!(vec![99, 98, 97, 96, 95, 94, 93, 92, 91, 90], twitter.get_news_feed(1));
-    for i in 10..20 {
-        twitter.post_tweet(1, i);
+    println!();
+
+    let board = &mut vecvec![
+        ['.','.','9','7','4','8','.','.','.'],
+        ['7','.','.','.','.','.','.','.','.'],
+        ['.','2','.','1','.','9','.','.','.'],
+        ['.','.','7','.','.','.','2','4','.'],
+        ['.','6','4','.','1','.','5','9','.'],
+        ['.','9','8','.','.','.','3','.','.'],
+        ['.','.','.','8','.','3','.','2','.'],
+        ['.','.','.','.','.','.','.','.','6'],
+        ['.','.','.','2','7','5','9','.','.']
+        ];
+    Solution::solve_sudoku(board);
+    for row in board.iter() {
+        println!("{:?}", row);
     }
-    assert_eq!(vec![19, 18, 17, 16, 15, 14, 13, 12, 11, 10], twitter.get_news_feed(1));
 }
