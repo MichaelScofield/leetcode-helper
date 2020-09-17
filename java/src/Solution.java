@@ -1,38 +1,33 @@
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class Solution {
 
-    int k;
-
-    public int kthSmallest(TreeNode root, int k) {
-        assert k >= 1;
-        this.k = k;
-        return kthSmallest(root).val;
+    public boolean isBalanced(TreeNode root) {
+        return isBalanced(root, new AtomicInteger(0));
     }
 
-    TreeNode kthSmallest(TreeNode root) {
+    boolean isBalanced(TreeNode root, AtomicInteger depth) {
         if (root == null) {
-            return null;
+            depth.set(0);
+            return true;
         }
-        if (root.left == null && root.right == null) {
-            return --k == 0 ? root : null;
-        }
-        if (root.left != null) {
-            TreeNode node = kthSmallest(root.left);
-            if (node != null) {
-                return node;
+        AtomicInteger leftDepth = new AtomicInteger(0);
+        AtomicInteger rightDepth = new AtomicInteger(0);
+        if (isBalanced(root.left, leftDepth) && isBalanced(root.right, rightDepth)) {
+            if (Math.abs(leftDepth.get() - rightDepth.get()) <= 1) {
+                depth.set(1 + Math.max(leftDepth.get(), rightDepth.get()));
+                return true;
             }
         }
-        if (--k == 0) {
-            return root;
-        }
-        return kthSmallest(root.right);
+        return false;
     }
 
     public static void main(String[] args) {
         Solution solution = new Solution();
         TreeNode root;
-        root = TreeNode.createTree(new Integer[]{3, 1, 4, null, 2});
-        System.out.println(solution.kthSmallest(root, 1)); // 1
-        root = TreeNode.createTree(new Integer[]{5, 3, 6, 2, 4, null, null, 1, null});
-        System.out.println(solution.kthSmallest(root, 3)); // 3
+        root = TreeNode.createTree(new Integer[]{3, 9, 20, null, null, 15, 7});
+        System.out.println(solution.isBalanced(root));
+        root = TreeNode.createTree(new Integer[]{1, 2, 2, 3, 3, null, null, 4, 4});
+        System.out.println(solution.isBalanced(root));
     }
 }
