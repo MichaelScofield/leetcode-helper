@@ -1,50 +1,57 @@
-import java.util.Comparator;
-import java.util.PriorityQueue;
-
 public class Solution {
 
-    static class MedianFinder {
-
-        double median;
-        int total = 0;
-        PriorityQueue<Integer> minHeap;
-        PriorityQueue<Integer> maxHeap;
-
-        public MedianFinder() {
-            minHeap = new PriorityQueue<>(Comparator.naturalOrder());
-            maxHeap = new PriorityQueue<>(Comparator.reverseOrder());
+    public int reversePairs(int[] nums) {
+        if (nums == null || nums.length <= 1) {
+            return 0;
         }
+        return reversePairs(nums, 0, nums.length);
+    }
 
-        public void addNum(int num) {
-            if (total % 2 == 0) {
-                minHeap.add(num);
-                Integer min = minHeap.poll();
-                maxHeap.add(min);
+    int reversePairs(int[] nums, int start, int end) {
+        int len = end - start;
+        if (len <= 1) {
+            return 0;
+        }
+        int mid = start + len / 2;
+        int leftPairs = reversePairs(nums, start, mid);
+        int rightPairs = reversePairs(nums, mid, end);
 
-                //noinspection ConstantConditions
-                median = maxHeap.peek();
-            } else {
-                maxHeap.add(num);
-                Integer max = maxHeap.poll();
-                minHeap.add(max);
-
-                //noinspection ConstantConditions
-                median = (minHeap.peek() + (maxHeap.peek() == null ? 0 : maxHeap.peek())) / 2.0;
+        int pairs = 0;
+        for (int i = mid - 1; i >= start; i--) {
+            for (int j = end - 1; j >= mid; j--) {
+                if ((long) nums[i] > 2 * (long) nums[j]) {
+                    pairs += j - mid + 1;
+                    break;
+                }
             }
-            total += 1;
         }
 
-        public double findMedian() {
-            return median;
+        int[] tmp = new int[len];
+        int i = mid - 1;
+        int j = end - 1;
+        int k = len - 1;
+        while (i >= start && j >= mid) {
+            if (nums[i] > nums[j]) {
+                tmp[k--] = nums[i--];
+            } else {
+                tmp[k--] = nums[j--];
+            }
         }
+        while (i >= start) {
+            tmp[k--] = nums[i--];
+        }
+        while (j >= mid) {
+            tmp[k--] = nums[j--];
+        }
+        System.arraycopy(tmp, 0, nums, start, len);
+        return pairs + leftPairs + rightPairs;
     }
 
     public static void main(String[] args) {
-        MedianFinder finder = new MedianFinder();
-        finder.addNum(1);
-        finder.addNum(2);
-        System.out.println(finder.findMedian() == 1.5);
-        finder.addNum(3);
-        System.out.println(finder.findMedian() == 2);
+        Solution solution = new Solution();
+        System.out.println(0 == solution.reversePairs(new int[]{2147483647, 2147483647, 2147483647, 2147483647, 2147483647, 2147483647}));
+        System.out.println(4 == solution.reversePairs(new int[]{5, 4, 3, 2, 1}));
+        System.out.println(2 == solution.reversePairs(new int[]{1, 3, 2, 3, 1}));
+        System.out.println(3 == solution.reversePairs(new int[]{2, 4, 3, 5, 1}));
     }
 }
