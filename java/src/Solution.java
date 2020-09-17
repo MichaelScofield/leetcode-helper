@@ -1,57 +1,63 @@
 public class Solution {
 
-    public int reversePairs(int[] nums) {
-        if (nums == null || nums.length <= 1) {
-            return 0;
+    public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
+        if (headA == null || headB == null) {
+            return null;
         }
-        return reversePairs(nums, 0, nums.length);
+        int l1 = len(headA), l2 = len(headB);
+        if (l1 > l2) {
+            headA = forward(headA, l1 - l2);
+        } else {
+            headB = forward(headB, l2 - l1);
+        }
+        while (headA != null && headB != null) {
+            if (headA == headB) {
+                return headA;
+            }
+            headA = headA.next;
+            headB = headB.next;
+        }
+        return null;
     }
 
-    int reversePairs(int[] nums, int start, int end) {
-        int len = end - start;
-        if (len <= 1) {
-            return 0;
+    int len(ListNode head) {
+        int l = 0;
+        while (head != null) {
+            l += 1;
+            head = head.next;
         }
-        int mid = start + len / 2;
-        int leftPairs = reversePairs(nums, start, mid);
-        int rightPairs = reversePairs(nums, mid, end);
+        return l;
+    }
 
-        int pairs = 0;
-        for (int i = mid - 1; i >= start; i--) {
-            for (int j = end - 1; j >= mid; j--) {
-                if ((long) nums[i] > 2 * (long) nums[j]) {
-                    pairs += j - mid + 1;
-                    break;
-                }
-            }
+    ListNode forward(ListNode head, int n) {
+        while (n-- > 0) {
+            head = head.next;
         }
-
-        int[] tmp = new int[len];
-        int i = mid - 1;
-        int j = end - 1;
-        int k = len - 1;
-        while (i >= start && j >= mid) {
-            if (nums[i] > nums[j]) {
-                tmp[k--] = nums[i--];
-            } else {
-                tmp[k--] = nums[j--];
-            }
-        }
-        while (i >= start) {
-            tmp[k--] = nums[i--];
-        }
-        while (j >= mid) {
-            tmp[k--] = nums[j--];
-        }
-        System.arraycopy(tmp, 0, nums, start, len);
-        return pairs + leftPairs + rightPairs;
+        return head;
     }
 
     public static void main(String[] args) {
         Solution solution = new Solution();
-        System.out.println(0 == solution.reversePairs(new int[]{2147483647, 2147483647, 2147483647, 2147483647, 2147483647, 2147483647}));
-        System.out.println(4 == solution.reversePairs(new int[]{5, 4, 3, 2, 1}));
-        System.out.println(2 == solution.reversePairs(new int[]{1, 3, 2, 3, 1}));
-        System.out.println(3 == solution.reversePairs(new int[]{2, 4, 3, 5, 1}));
+
+        ListNode n1_1 = new ListNode(4);
+        ListNode n1_2 = new ListNode(1);
+        ListNode n1_3 = new ListNode(8);
+        ListNode n1_4 = new ListNode(4);
+        ListNode n1_5 = new ListNode(5);
+        n1_1.next = n1_2;
+        n1_2.next = n1_3;
+        n1_3.next = n1_4;
+        n1_4.next = n1_5;
+        ListNode n2_1 = new ListNode(5);
+        ListNode n2_2 = new ListNode(6);
+        ListNode n2_3 = new ListNode(1);
+        n2_1.next = n2_2;
+        n2_2.next = n2_3;
+        n2_3.next = n1_3;
+        System.out.println(solution.getIntersectionNode(n1_1, n2_1) == n1_3);
+
+        ListNode headA = ListNode.from(new Integer[]{2, 6, 4}, null);
+        ListNode headB = ListNode.from(new Integer[]{1, 5}, null);
+        System.out.println(solution.getIntersectionNode(headA, headB) == null);
     }
 }
