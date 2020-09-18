@@ -3,24 +3,53 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn missing_number(nums: Vec<i32>) -> i32 {
-        let nums = &mut { nums };
-        nums.sort();
-        let mut i = 0;
-        let mut j = nums.len() as i32 - 1;
-        while i <= j {
-            let mid = (j - i) / 2 + i;
-            if nums[mid as usize] == mid {
-                i = mid + 1;
-            } else {
-                j = mid - 1;
+    pub fn generate_parenthesis(n: i32) -> Vec<String> {
+        if n < 1 {
+            return Vec::with_capacity(0);
+        }
+
+        fn is_valid(parenthesis: &Vec<char>) -> bool {
+            let len = parenthesis.len();
+            let mut tmp = Vec::with_capacity(len);
+            for &x in parenthesis {
+                if x == ')' {
+                    if let Some(&top) = tmp.last() {
+                        if top == '(' {
+                            tmp.pop();
+                            continue;
+                        }
+                    }
+                }
+                tmp.push(x);
+            }
+            tmp.is_empty()
+        }
+
+        fn backtrace(solution: &mut Vec<String>, len: usize, parenthesis: &mut Vec<char>) {
+            if parenthesis.len() == len {
+                if is_valid(parenthesis) {
+                    solution.push(parenthesis.clone().into_iter().collect());
+                }
+                return;
+            }
+
+            for &c in ['(', ')'].iter() {
+                parenthesis.push(c);
+                backtrace(solution, len, parenthesis);
+                parenthesis.pop();
             }
         }
-        i
+
+        let mut solution = vec![];
+        let len = n as usize * 2;
+        let mut parenthesis = vec![];
+        backtrace(&mut solution, len, &mut parenthesis);
+        solution
     }
 }
 
 fn main() {
-    assert_eq!(2, Solution::missing_number(vec![3, 0, 1]));
-    assert_eq!(8, Solution::missing_number(vec![9, 6, 4, 2, 3, 5, 7, 0, 1]));
+    let solution = Solution::generate_parenthesis(3);
+    eprintln!("solution = {:?}", solution);
+    assert_eq!(5, solution.len());
 }
