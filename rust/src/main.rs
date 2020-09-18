@@ -3,53 +3,45 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn generate_parenthesis(n: i32) -> Vec<String> {
-        if n < 1 {
-            return Vec::with_capacity(0);
+    pub fn single_number(nums: Vec<i32>) -> Vec<i32> {
+        assert!(nums.len() >= 2);
+        let nums = &mut { nums };
+
+        fn xor(nums: &Vec<i32>, i: usize, j: usize) -> i32 {
+            let mut xor = nums[i];
+            for k in i + 1..j {
+                xor ^= nums[k];
+            }
+            xor
         }
 
-        fn is_valid(parenthesis: &Vec<char>) -> bool {
-            let len = parenthesis.len();
-            let mut tmp = Vec::with_capacity(len);
-            for &x in parenthesis {
-                if x == ')' {
-                    if let Some(&top) = tmp.last() {
-                        if top == '(' {
-                            tmp.pop();
-                            continue;
-                        }
-                    }
-                }
-                tmp.push(x);
-            }
-            tmp.is_empty()
-        }
-
-        fn backtrace(solution: &mut Vec<String>, len: usize, parenthesis: &mut Vec<char>) {
-            if parenthesis.len() == len {
-                if is_valid(parenthesis) {
-                    solution.push(parenthesis.clone().into_iter().collect());
-                }
-                return;
-            }
-
-            for &c in ['(', ')'].iter() {
-                parenthesis.push(c);
-                backtrace(solution, len, parenthesis);
-                parenthesis.pop();
+        let x = xor(nums, 0, nums.len());
+        let mut bit_mask = 1;
+        for i in 0..32 {
+            bit_mask = 1 << i;
+            if x & bit_mask == bit_mask {
+                break;
             }
         }
+        assert_ne!(bit_mask, 0);
 
-        let mut solution = vec![];
-        let len = n as usize * 2;
-        let mut parenthesis = vec![];
-        backtrace(&mut solution, len, &mut parenthesis);
-        solution
+        let mut i = 0;
+        let mut j = nums.len() - 1;
+        while i <= j {
+            if &nums[i] & bit_mask == bit_mask {
+                nums.swap(i, j);
+                j -= 1;
+            } else {
+                i += 1;
+            }
+        }
+        let p = j + 1;
+        vec![xor(nums, 0, p), xor(nums, p, nums.len())]
     }
 }
 
 fn main() {
-    let solution = Solution::generate_parenthesis(3);
-    eprintln!("solution = {:?}", solution);
-    assert_eq!(5, solution.len());
+    assert_eq!(vec![5, 3], Solution::single_number(vec![1, 2, 1, 3, 2, 5]));
+    assert_eq!(vec![0, -1], Solution::single_number(vec![-1, 0]));
+    assert_eq!(vec![0, 1], Solution::single_number(vec![0, 1]));
 }
