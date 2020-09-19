@@ -3,25 +3,35 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn sum_odd_length_subarrays(arr: Vec<i32>) -> i32 {
-        let len = arr.len();
-        assert!(len >= 1);
-        let mut sum = 0;
-        for l in (1..=len).step_by(2) {
-            let mut i = 0;
-            let mut j = i + l;
-            while j <= len {
-                sum += arr[i..j].iter().sum::<i32>();
-                i += 1;
-                j += 1;
+    pub fn max_sum_range_query(nums: Vec<i32>, requests: Vec<Vec<i32>>) -> i32 {
+        assert!(nums.len() >= 1 && requests.len() >= 1);
+        let mut buckets = vec![0; nums.len()];
+        for request in requests {
+            let start = request[0];
+            let end = request[1];
+            for i in start..=end {
+                buckets[i as usize] += 1;
             }
+        }
+        buckets.sort();
+
+        let nums = &mut { nums };
+        nums.sort();
+        let mut sum = 0;
+        for i in 0..nums.len() {
+            sum += nums[i] * buckets[i];
         }
         sum
     }
 }
 
 fn main() {
-    assert_eq!(58, Solution::sum_odd_length_subarrays(vec![1, 4, 2, 5, 3]));
-    assert_eq!(3, Solution::sum_odd_length_subarrays(vec![1, 2]));
-    assert_eq!(66, Solution::sum_odd_length_subarrays(vec![10, 11, 12]));
+    let requests = vecvec![[1,3],[0,1]];
+    assert_eq!(19, Solution::max_sum_range_query(vec![1, 2, 3, 4, 5], requests));
+    let requests = vecvec![[0,1]];
+    assert_eq!(11, Solution::max_sum_range_query(vec![1, 2, 3, 4, 5, 6], requests));
+    let requests = vecvec![[0,2],[1,3],[1,1]];
+    assert_eq!(47, Solution::max_sum_range_query(vec![1, 2, 3, 4, 5, 10], requests));
+    let requests = vecvec![[0,0],[0,0]];
+    assert_eq!(2, Solution::max_sum_range_query(vec![1], requests));
 }
