@@ -3,35 +3,40 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn max_sum_range_query(nums: Vec<i32>, requests: Vec<Vec<i32>>) -> i32 {
-        assert!(nums.len() >= 1 && requests.len() >= 1);
-        let mut buckets = vec![0; nums.len()];
-        for request in requests {
-            let start = request[0];
-            let end = request[1];
-            for i in start..=end {
-                buckets[i as usize] += 1;
+    pub fn min_subarray(nums: Vec<i32>, p: i32) -> i32 {
+        let len = nums.len();
+        assert!(len >= 1 && p >= 1);
+        let nums = nums.iter().map(|&n| n as u64).collect::<Vec<u64>>();
+        let p = p as u64;
+        let sum = nums.iter().sum::<u64>();
+        if sum % p == 0 {
+            return 0;
+        }
+        for l in 1..len {
+            let mut i = 0;
+            let mut j = i + l;
+            let mut subarray_sum = nums[i..j].iter().sum::<u64>();
+            loop {
+                if (sum - subarray_sum) % p == 0 {
+                    return l as i32;
+                }
+                if j == len {
+                    break;
+                }
+                subarray_sum -= nums[i];
+                subarray_sum += nums[j];
+                i += 1;
+                j += 1;
             }
         }
-        buckets.sort();
-
-        let nums = &mut { nums };
-        nums.sort();
-        let mut sum = 0;
-        for i in 0..nums.len() {
-            sum += nums[i] * buckets[i];
-        }
-        sum
+        -1
     }
 }
 
 fn main() {
-    let requests = vecvec![[1,3],[0,1]];
-    assert_eq!(19, Solution::max_sum_range_query(vec![1, 2, 3, 4, 5], requests));
-    let requests = vecvec![[0,1]];
-    assert_eq!(11, Solution::max_sum_range_query(vec![1, 2, 3, 4, 5, 6], requests));
-    let requests = vecvec![[0,2],[1,3],[1,1]];
-    assert_eq!(47, Solution::max_sum_range_query(vec![1, 2, 3, 4, 5, 10], requests));
-    let requests = vecvec![[0,0],[0,0]];
-    assert_eq!(2, Solution::max_sum_range_query(vec![1], requests));
+    assert_eq!(1, Solution::min_subarray(vec![3, 1, 4, 2], 6));
+    assert_eq!(2, Solution::min_subarray(vec![6, 3, 5, 2], 9));
+    assert_eq!(0, Solution::min_subarray(vec![1, 2, 3], 3));
+    assert_eq!(-1, Solution::min_subarray(vec![1, 2, 3], 7));
+    assert_eq!(0, Solution::min_subarray(vec![1000000000, 1000000000, 1000000000], 3));
 }
