@@ -3,40 +3,76 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn min_subarray(nums: Vec<i32>, p: i32) -> i32 {
-        let len = nums.len();
-        assert!(len >= 1 && p >= 1);
-        let nums = nums.iter().map(|&n| n as u64).collect::<Vec<u64>>();
-        let p = p as u64;
-        let sum = nums.iter().sum::<u64>();
-        if sum % p == 0 {
-            return 0;
-        }
-        for l in 1..len {
-            let mut i = 0;
-            let mut j = i + l;
-            let mut subarray_sum = nums[i..j].iter().sum::<u64>();
-            loop {
-                if (sum - subarray_sum) % p == 0 {
-                    return l as i32;
+    pub fn reorder_spaces(text: String) -> String {
+        assert!(text.len() > 0);
+        let chars = text.chars().collect::<Vec<char>>();
+        let len = chars.len();
+        let mut spaces = 0;
+        let mut words = 0;
+        let mut letters = 0;
+        let mut is_counting_word = false;
+        for i in 0..len {
+            if chars[i] == ' ' {
+                spaces += 1;
+                if is_counting_word {
+                    is_counting_word = false;
+                    words += 1;
                 }
-                if j == len {
-                    break;
+            } else {
+                letters += 1;
+                if !is_counting_word {
+                    is_counting_word = true;
                 }
-                subarray_sum -= nums[i];
-                subarray_sum += nums[j];
-                i += 1;
-                j += 1;
             }
         }
-        -1
+        if is_counting_word {
+            words += 1;
+        }
+        if words == 0 {
+            return text;
+        }
+        let spaces_between_words = if words == 1 { 0 } else { spaces / (words - 1) };
+        let mut s = Vec::with_capacity(len);
+        let mut i = 0;
+        while i < len {
+            if chars[i] != ' ' {
+                break;
+            }
+            i += 1;
+        }
+        while i < len && letters > 0 {
+            if chars[i] != ' ' {
+                s.push(chars[i]);
+                i += 1;
+                letters -= 1;
+            } else {
+                for _j in 0..spaces_between_words {
+                    s.push(' ');
+                }
+                while i < len {
+                    if chars[i] != ' ' {
+                        break;
+                    }
+                    i += 1;
+                }
+            }
+        }
+        while s.len() < len {
+            s.push(' ');
+        }
+        s.iter().collect()
     }
 }
 
 fn main() {
-    assert_eq!(1, Solution::min_subarray(vec![3, 1, 4, 2], 6));
-    assert_eq!(2, Solution::min_subarray(vec![6, 3, 5, 2], 9));
-    assert_eq!(0, Solution::min_subarray(vec![1, 2, 3], 3));
-    assert_eq!(-1, Solution::min_subarray(vec![1, 2, 3], 7));
-    assert_eq!(0, Solution::min_subarray(vec![1000000000, 1000000000, 1000000000], 3));
+    assert_eq!("this   is   a   sentence".to_string(),
+               Solution::reorder_spaces("  this   is  a sentence ".to_string()));
+    assert_eq!("practice   makes   perfect ".to_string(),
+               Solution::reorder_spaces(" practice   makes   perfect".to_string()));
+    assert_eq!("hello   world".to_string(),
+               Solution::reorder_spaces("hello   world".to_string()));
+    assert_eq!("walks  udp  package  into  bar  a ".to_string(),
+               Solution::reorder_spaces("  walks  udp package   into  bar a".to_string()));
+    assert_eq!("a", Solution::reorder_spaces("a".to_string()));
+    assert_eq!("  ", Solution::reorder_spaces("  ".to_string()));
 }
