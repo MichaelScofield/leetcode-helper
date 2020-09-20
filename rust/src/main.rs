@@ -7,23 +7,33 @@ impl Solution {
         assert!(grid.len() > 0 && grid[0].len() > 0);
         let rows = grid.len();
         let cols = grid[0].len();
-        let mut dp = vec![vec![0; cols + 1]; rows + 1];
-        for i in 0..rows {
-            dp[i][0] = grid[i][0] as i64;
+        let mut max = vec![vec![0; cols]; rows];
+        let mut min = vec![vec![0; cols]; rows];
+        max[0][0] = grid[0][0] as i64;
+        min[0][0] = grid[0][0] as i64;
+        for i in 1..rows {
+            max[i][0] = max[i - 1][0] * grid[i][0] as i64;
+            min[i][0] = min[i - 1][0] * grid[i][0] as i64;
         }
-        for i in 0..cols {
-            dp[0][i] = grid[0][i] as i64;
+        for j in 1..cols {
+            max[0][j] = max[0][j - 1] * grid[0][j] as i64;
+            min[0][j] = min[0][j - 1] * grid[0][j] as i64;
         }
-        for i in 1..=rows {
-            for j in 1..=cols {
-                let num = grid[i - 1][j - 1] as i64;
-                dp[i][j] = std::cmp::max(dp[i - 1][j] * num, dp[i][j - 1] * num);
+        for i in 1..rows {
+            for j in 1..cols {
+                let num = grid[i][j] as i64;
+                let a = max[i - 1][j] * num;
+                let b = max[i][j - 1] * num;
+                let c = min[i - 1][j] * num;
+                let d = min[i][j - 1] * num;
+                max[i][j] = std::cmp::max(std::cmp::max(a, b), std::cmp::max(c, d));
+                min[i][j] = std::cmp::min(std::cmp::min(a, b), std::cmp::min(c, d));
             }
         }
-        if dp[rows][cols] < 0 {
+        if max[rows - 1][cols - 1] < 0 {
             -1
         } else {
-            (dp[rows][cols] % 1_000_000_007) as i32
+            (max[rows - 1][cols - 1] % 1_000_000_007) as i32
         }
     }
 }
