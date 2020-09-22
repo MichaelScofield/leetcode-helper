@@ -3,44 +3,41 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn max_product_path(grid: Vec<Vec<i32>>) -> i32 {
-        assert!(grid.len() > 0 && grid[0].len() > 0);
-        let rows = grid.len();
-        let cols = grid[0].len();
-        let mut max = vec![vec![0; cols]; rows];
-        let mut min = vec![vec![0; cols]; rows];
-        max[0][0] = grid[0][0] as i64;
-        min[0][0] = grid[0][0] as i64;
-        for i in 1..rows {
-            max[i][0] = max[i - 1][0] * grid[i][0] as i64;
-            min[i][0] = min[i - 1][0] * grid[i][0] as i64;
-        }
-        for j in 1..cols {
-            max[0][j] = max[0][j - 1] * grid[0][j] as i64;
-            min[0][j] = min[0][j - 1] * grid[0][j] as i64;
-        }
-        for i in 1..rows {
-            for j in 1..cols {
-                let num = grid[i][j] as i64;
-                let a = max[i - 1][j] * num;
-                let b = max[i][j - 1] * num;
-                let c = min[i - 1][j] * num;
-                let d = min[i][j - 1] * num;
-                max[i][j] = std::cmp::max(std::cmp::max(a, b), std::cmp::max(c, d));
-                min[i][j] = std::cmp::min(std::cmp::min(a, b), std::cmp::min(c, d));
+    pub fn pancake_sort(arr: Vec<i32>) -> Vec<i32> {
+        assert!(arr.len() > 0);
+        fn flip(arr: &mut [i32], n: usize) {
+            let mut i = 0;
+            let mut j = n;
+            while i < j {
+                arr.swap(i, j);
+                i += 1;
+                j -= 1;
             }
         }
-        if max[rows - 1][cols - 1] < 0 {
-            -1
-        } else {
-            (max[rows - 1][cols - 1] % 1_000_000_007) as i32
+        fn pancake_sort(arr: &mut [i32], flips: &mut Vec<i32>) {
+            let len = arr.len();
+            if len == 0 {
+                return;
+            }
+            let max_index = arr.iter().enumerate().max_by_key(|e| e.1).unwrap().0;
+            if max_index < len - 1 {
+                if max_index > 0 {
+                    flip(arr, max_index);
+                    flips.push(max_index as i32 + 1);
+                }
+                flip(arr, len - 1);
+                flips.push(len as i32);
+            }
+            pancake_sort(&mut arr[..len - 1], flips)
         }
+        let arr = &mut { arr };
+        let mut flips = Vec::with_capacity(arr.len());
+        pancake_sort(arr.as_mut_slice(), &mut flips);
+        flips
     }
 }
 
 fn main() {
-    assert_eq!(-1, Solution::max_product_path(vecvec![[-1,-2,-3],[-2,-3,-3],[-3,-3,-2]]));
-    assert_eq!(8, Solution::max_product_path(vecvec![[1,-2,1],[1,-2,1],[3,-4,1]]));
-    assert_eq!(0, Solution::max_product_path(vecvec![[1, 3],[0,-4]]));
-    assert_eq!(2, Solution::max_product_path(vecvec![[ 1, 4,4,0],[-2, 0,0,1],[ 1,-1,1,1]]));
+    assert_eq!(vec![3, 4, 2, 3, 2], Solution::pancake_sort(vec![3, 2, 4, 1]));
+    assert_eq!(Vec::<i32>::new(), Solution::pancake_sort(vec![1, 2, 3]));
 }
