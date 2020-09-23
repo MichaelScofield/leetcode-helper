@@ -3,19 +3,25 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn reverse_left_words(s: String, n: i32) -> String {
-        assert!(n >= 1 && s.len() > n as usize);
-        let mut chars = s.chars().collect::<Vec<char>>();
-        let len = chars.len();
-        let n = n as usize;
-        chars[0..len].reverse();
-        chars[0..len - n].reverse();
-        chars[len - n..len].reverse();
-        chars.iter().collect()
+    pub fn subarray_sum(nums: Vec<i32>, k: i32) -> i32 {
+        let len = nums.len();
+        assert!(len > 0);
+        let mut pre_sum = vec![0; len + 1];
+        for i in 0..len {
+            pre_sum[i + 1] = pre_sum[i] + nums[i];
+        }
+        let mut subarrays = 0;
+        for w in 1..=len {
+            for i in 0..len - w + 1 {
+                if pre_sum[i + w] - pre_sum[i] == k {
+                    subarrays += 1;
+                }
+            }
+        }
+        subarrays
     }
 }
 
 fn main() {
-    assert_eq!("cdefgab".to_string(), Solution::reverse_left_words("abcdefg".to_string(), 2));
-    assert_eq!("umghlrlose".to_string(), Solution::reverse_left_words("lrloseumgh".to_string(), 6));
+    assert_eq!(2, Solution::subarray_sum(vec![1, 1, 1], 2));
 }
