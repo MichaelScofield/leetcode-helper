@@ -3,30 +3,24 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn last_remaining(n: i32, m: i32) -> i32 {
-        assert!(n > 0 && m > 0);
-        if n == 1 {
-            return n;
+    pub fn max_profit(prices: Vec<i32>) -> i32 {
+        if prices.len() == 0 {
+            return 0;
         }
-        let n = n as usize;
-        let m = m as usize;
-        let mut arr = vec![0; n];
-        for i in 0..n {
-            arr[i] = i;
-        }
-        let mut i = 0;
-        loop {
-            i = (i + m - 1) % arr.len();
-            arr.remove(i);
-            if arr.len() == 1 {
-                break;
+        let mut max_profit = 0;
+        let mut min_price = std::i32::MAX;
+        for price in prices {
+            if price < min_price {
+                min_price = price;
+            } else {
+                max_profit = std::cmp::max(max_profit, price - min_price);
             }
         }
-        arr[0] as i32
+        max_profit
     }
 }
 
 fn main() {
-    assert_eq!(3, Solution::last_remaining(5, 3));
-    assert_eq!(2, Solution::last_remaining(10, 17));
+    assert_eq!(5, Solution::max_profit(vec![7, 1, 5, 3, 6, 4]));
+    assert_eq!(0, Solution::max_profit(vec![7, 6, 4, 3, 1]));
 }
