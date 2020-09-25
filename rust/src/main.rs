@@ -3,24 +3,34 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn max_profit(prices: Vec<i32>) -> i32 {
-        if prices.len() == 0 {
-            return 0;
+    pub fn remove_covered_intervals(intervals: Vec<Vec<i32>>) -> i32 {
+        assert!(intervals.len() > 0);
+        if intervals.len() == 1 {
+            return 1;
         }
-        let mut max_profit = 0;
-        let mut min_price = std::i32::MAX;
-        for price in prices {
-            if price < min_price {
-                min_price = price;
+        let intervals = &mut { intervals };
+        use std::cmp::Ordering;
+        intervals.sort_by(|a, b| {
+            let ordering = a[0].cmp(&b[0]);
+            if ordering == Ordering::Equal {
+                b[1].cmp(&a[1])
             } else {
-                max_profit = std::cmp::max(max_profit, price - min_price);
+                ordering
+            }
+        });
+        let mut max = &intervals[0];
+        let mut remain = 1;
+        for i in 1..intervals.len() {
+            let curr = &intervals[i];
+            if curr[1] > max[1] {
+                remain += 1;
+                max = curr;
             }
         }
-        max_profit
+        remain
     }
 }
 
 fn main() {
-    assert_eq!(5, Solution::max_profit(vec![7, 1, 5, 3, 6, 4]));
-    assert_eq!(0, Solution::max_profit(vec![7, 6, 4, 3, 1]));
+    assert_eq!(2, Solution::remove_covered_intervals(vecvec![[1,4],[3,6],[2,8]]));
 }
