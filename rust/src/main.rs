@@ -3,30 +3,32 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn two_sum(n: i32) -> Vec<f64> {
-        assert!(n > 0);
-        let n = n as usize;
-        fn backtrack(n: usize, (touzi, s): (&mut Vec<usize>, usize), sums: &mut Vec<i32>) {
-            if touzi.len() == n {
-                sums[s - n] += 1;
-                return;
+    pub fn is_straight(nums: Vec<i32>) -> bool {
+        assert_eq!(nums.len(), 5);
+        let nums = &mut { nums };
+        nums.sort();
+        let jokers = nums.iter().filter(|&&c| c == 0).count();
+        let mut gaps = 0;
+        let mut i = jokers;
+        while i + 1 < nums.len() {
+            let x = nums[i + 1] - nums[i];
+            if x == 0 {
+                return false;
             }
-            for dian in 1..=6 {
-                touzi.push(dian);
-                backtrack(n, (touzi, s + dian), sums);
-                touzi.pop();
+            if x > 1 {
+                gaps += x - 1;
             }
+            i += 1;
         }
-        let mut sums = vec![0; 5 * n + 1];
-        let mut touzi = Vec::with_capacity(n);
-        backtrack(n, (&mut touzi, 0), &mut sums);
-        let total = 6i32.pow(n as u32) as f64;
-        sums.iter().map(|&s| s as f64 / total).collect()
+        jokers >= gaps as usize
     }
 }
 
 fn main() {
-    println!("{:?}", Solution::two_sum(1));
-    println!("{:?}", Solution::two_sum(2));
-    println!("{:?}", Solution::two_sum(11));
+    assert!(Solution::is_straight(vec![1, 2, 3, 4, 5]));
+    assert!(Solution::is_straight(vec![0, 0, 1, 2, 5]));
+    assert!(!Solution::is_straight(vec![0, 0, 1, 2, 6]));
+    assert!(Solution::is_straight(vec![0, 0, 0, 0, 0]));
+    assert!(Solution::is_straight(vec![0, 0, 0, 0, 1]));
+    assert!(Solution::is_straight(vec![11, 0, 9, 0, 0]));
 }
