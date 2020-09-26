@@ -3,35 +3,31 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn interval_intersection(a: Vec<Vec<i32>>, b: Vec<Vec<i32>>) -> Vec<Vec<i32>> {
-        if a.len() == 0 || b.len() == 0 {
-            return vec![];
-        }
-        let mut intersections = vec![];
-        let mut i = 0;
-        let mut j = 0;
-        while i < a.len() && j < b.len() {
-            let a = &a[i];
-            let b = &b[j];
-            if b[0] > a[1] {
-                i += 1;
-            } else if a[0] > b[1] {
-                j += 1;
+    pub fn min_add_to_make_valid(s: String) -> i32 {
+        let mut stack = Vec::with_capacity(s.len());
+        let mut add = 0;
+        for &x in s.as_bytes() {
+            if x == b'(' {
+                stack.push(x);
             } else {
-                intersections.push(vec![std::cmp::max(a[0], b[0]), std::cmp::min(a[1], b[1])]);
-                if a[1] < b[1] {
-                    i += 1;
+                if let Some(&p) = stack.last() {
+                    if p == b'(' {
+                        stack.pop();
+                    } else {
+                        add += 1;
+                    }
                 } else {
-                    j += 1;
+                    add += 1;
                 }
             }
         }
-        intersections
+        add + stack.len() as i32
     }
 }
 
 fn main() {
-    let a = vecvec![[0,2],[5,10],[13,23],[24,25]];
-    let b = vecvec![[1,5],[8,12],[15,24],[25,26]];
-    assert_eq!(vecvec![[1,2],[5,5],[8,10],[15,23],[24,24],[25,25]], Solution::interval_intersection(a, b));
+    assert_eq!(1, Solution::min_add_to_make_valid("())".to_string()));
+    assert_eq!(3, Solution::min_add_to_make_valid("(((".to_string()));
+    assert_eq!(0, Solution::min_add_to_make_valid("()".to_string()));
+    assert_eq!(4, Solution::min_add_to_make_valid("()))((".to_string()));
 }
