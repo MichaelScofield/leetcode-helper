@@ -1,33 +1,26 @@
-import java.util.concurrent.atomic.AtomicInteger;
-
 public class Solution {
 
-    public boolean isBalanced(TreeNode root) {
-        return isBalanced(root, new AtomicInteger(0));
+    public Node connect(Node root) {
+        if (root == null) {
+            return null;
+        }
+        connect(root.left, root.right);
+        return root;
     }
 
-    boolean isBalanced(TreeNode root, AtomicInteger depth) {
-        if (root == null) {
-            depth.set(0);
-            return true;
+    void connect(Node n1, Node n2) {
+        if (n1 == null || n2 == null) {
+            return;
         }
-        AtomicInteger leftDepth = new AtomicInteger(0);
-        AtomicInteger rightDepth = new AtomicInteger(0);
-        if (isBalanced(root.left, leftDepth) && isBalanced(root.right, rightDepth)) {
-            if (Math.abs(leftDepth.get() - rightDepth.get()) <= 1) {
-                depth.set(1 + Math.max(leftDepth.get(), rightDepth.get()));
-                return true;
-            }
-        }
-        return false;
+        n1.next = n2;
+        connect(n1.left, n1.right);
+        connect(n2.left, n2.right);
+        connect(n1.right, n2.left);
     }
 
     public static void main(String[] args) {
         Solution solution = new Solution();
-        TreeNode root;
-        root = TreeNode.createTree(new Integer[]{3, 9, 20, null, null, 15, 7});
-        System.out.println(solution.isBalanced(root));
-        root = TreeNode.createTree(new Integer[]{1, 2, 2, 3, 3, null, null, 4, 4});
-        System.out.println(solution.isBalanced(root));
+        Node root = Node.createTree(new Integer[]{1, 2, 3, 4, 5, 6, 7});
+        Node.printTree(solution.connect(root));
     }
 }
