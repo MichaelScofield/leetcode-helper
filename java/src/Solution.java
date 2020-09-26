@@ -1,26 +1,28 @@
 public class Solution {
 
-    public Node connect(Node root) {
+    public void flatten(TreeNode root) {
         if (root == null) {
-            return null;
-        }
-        connect(root.left, root.right);
-        return root;
-    }
-
-    void connect(Node n1, Node n2) {
-        if (n1 == null || n2 == null) {
             return;
         }
-        n1.next = n2;
-        connect(n1.left, n1.right);
-        connect(n2.left, n2.right);
-        connect(n1.right, n2.left);
+        TreeNode left = root.left;
+        TreeNode right = root.right;
+        flatten(left);
+        flatten(right);
+        if (left != null) {
+            TreeNode rightMost = left;
+            while (rightMost.right != null) {
+                rightMost = rightMost.right;
+            }
+            rightMost.right = right;
+            root.right = left;
+            root.left = null;
+        }
     }
 
     public static void main(String[] args) {
         Solution solution = new Solution();
-        Node root = Node.createTree(new Integer[]{1, 2, 3, 4, 5, 6, 7});
-        Node.printTree(solution.connect(root));
+        TreeNode root = TreeNode.createTree(new Integer[]{1, 2, 5, 3, 4, null, 6});
+        solution.flatten(root);
+        TreeNode.printTree(root);
     }
 }

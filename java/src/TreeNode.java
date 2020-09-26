@@ -3,34 +3,33 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-public class Node {
+public class TreeNode {
 
     int val;
-    Node left;
-    Node right;
-    Node next;
+    TreeNode left;
+    TreeNode right;
 
-    Node(int val) {
+    TreeNode(int val) {
         this.val = val;
     }
 
-    static Node createTree(Integer[] vals) {
+    static TreeNode createTree(Integer[] vals) {
         if (vals == null || vals.length < 1) {
             return null;
         }
-        Node root = new Node(vals[0]);
-        List<Node> currLevel = Collections.singletonList(root);
+        TreeNode root = new TreeNode(vals[0]);
+        List<TreeNode> currLevel = Collections.singletonList(root);
         for (int i = 1; i < vals.length; ) {
-            List<Node> nextLevel = new ArrayList<>();
-            for (Node node : currLevel) {
+            List<TreeNode> nextLevel = new ArrayList<>();
+            for (TreeNode node : currLevel) {
                 Integer leftVal = vals[i++];
                 if (leftVal != null) {
-                    node.left = new Node(leftVal);
+                    node.left = new TreeNode(leftVal);
                     nextLevel.add(node.left);
                 }
                 Integer rightVal = vals[i++];
                 if (rightVal != null) {
-                    node.right = new Node(rightVal);
+                    node.right = new TreeNode(rightVal);
                     nextLevel.add(node.right);
                 }
                 if (i >= vals.length) {
@@ -43,18 +42,18 @@ public class Node {
     }
 
     @SuppressWarnings("unused")
-    static void printTree(Node root) {
+    static void printTree(TreeNode root) {
         if (root == null) {
             System.out.println("null");
             return;
         }
-        List<Node> currLevel = new ArrayList<>();
+        List<TreeNode> currLevel = new ArrayList<>();
         currLevel.add(root);
         while (true) {
             System.out.println(currLevel);
 
-            List<Node> nextLevel = new ArrayList<>();
-            for (Node node : currLevel) {
+            List<TreeNode> nextLevel = new ArrayList<>();
+            for (TreeNode node : currLevel) {
                 if (node != null) {
                     nextLevel.add(node.left);
                     nextLevel.add(node.right);
