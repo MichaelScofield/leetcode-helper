@@ -16,13 +16,19 @@ class Solution {
     public int[] shuffle() {
         int[] copy = Arrays.copyOf(nums, nums.length);
         Random random = new Random(System.nanoTime());
-        for (int i = 0; i < copy.length; i++) {
-            int r = random.nextInt(copy.length);
-            int tmp = copy[i];
-            copy[i] = copy[r];
-            copy[r] = tmp;
+        for (int i = copy.length - 1; i > 0; i--) {
+            int r = random.nextInt(i + 1);
+            if (i != r) {
+                swap(copy, i, r);
+            }
         }
         return copy;
+    }
+
+    void swap(int[] nums, int i, int j) {
+        int tmp = nums[i];
+        nums[i] = nums[j];
+        nums[j] = tmp;
     }
 
     public static void main(String[] args) {
