@@ -3,33 +3,60 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn max_envelopes(envelopes: Vec<Vec<i32>>) -> i32 {
-        if envelopes.len() == 0 {
-            return 0;
-        }
-        let envelopes = &mut { envelopes };
-        envelopes.sort_by(|a, b|
-            a[0].cmp(&b[0]).then(a[1].cmp(&b[1])));
-        let mut dp = vec![1; envelopes.len()];
-        dp[0] = 1;
-        for i in 1..envelopes.len() {
-            for j in (0..i).rev() {
-                if envelopes[i][0] > envelopes[j][0] && envelopes[i][1] > envelopes[j][1] {
-                    dp[i] = std::cmp::max(dp[i], dp[j] + 1);
+    pub fn preimage_size_fzf(k: i32) -> i32 {
+        assert!(k >= 0);
+
+        fn left_bound(k: i64) -> i64 {
+            let mut l = 0;
+            let mut h = std::i64::MAX;
+            while l <= h {
+                let mid = l + (h - l) / 2;
+                let zeroes = Solution::trailing_zeroes(mid);
+                if zeroes == k {
+                    h = mid - 1;
+                } else if zeroes < k {
+                    l = mid + 1;
+                } else {
+                    h = mid - 1;
                 }
             }
+            h + 1
         }
-        *dp.iter().max().unwrap()
+
+        fn right_bound(k: i64) -> i64 {
+            let mut l = 0;
+            let mut h = std::i64::MAX;
+            while l <= h {
+                let mid = l + (h - l) / 2;
+                let zeroes = Solution::trailing_zeroes(mid);
+                if zeroes == k {
+                    l = mid + 1;
+                } else if zeroes < k {
+                    l = mid + 1;
+                } else {
+                    h = mid - 1;
+                }
+            }
+            l - 1
+        }
+
+        let k = k as i64;
+        (right_bound(k) - left_bound(k) + 1) as i32
+    }
+
+    fn trailing_zeroes(n: i64) -> i64 {
+        let mut zeroes = 0;
+        let mut d = 1;
+        // expect "d * 5 <= n", shift multiply to the right side to avoid overflow
+        while d <= n / 5 {
+            d *= 5;
+            zeroes += n / d;
+        }
+        zeroes
     }
 }
 
 fn main() {
-    let envelopes = vecvec![[46,89],[50,53],[52,68],[72,45],[77,81]];
-    assert_eq!(3, Solution::max_envelopes(envelopes));
-    let envelopes = vecvec![[4,5],[4,6],[6,7],[2,3],[1,1],[1,1]];
-    assert_eq!(4, Solution::max_envelopes(envelopes));
-    assert_eq!(3, Solution::max_envelopes(vecvec![[5,4],[6,4],[6,7],[2,3]]));
-    let envelopes =
-        vecvec![[2,100],[3,200],[4,300],[5,500],[5,400],[5,250],[6,370],[6,360],[7,380]];
-    assert_eq!(5, Solution::max_envelopes(envelopes));
+    assert_eq!(5, Solution::preimage_size_fzf(0));
+    assert_eq!(0, Solution::preimage_size_fzf(5));
 }
