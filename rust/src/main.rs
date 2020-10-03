@@ -3,23 +3,41 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn min_eating_speed(piles: Vec<i32>, h: i32) -> i32 {
-        let len = piles.len();
-        assert!(len > 0);
-        assert!(h >= len as i32);
+    pub fn ship_within_days(weights: Vec<i32>, d: i32) -> i32 {
+        let len = weights.len();
+        assert!(d >= 1);
+        assert!(len >= d as usize);
 
-        let piles = &mut { piles };
-        piles.sort();
+        fn ship_days(weights: &Vec<i32>, capacity: i32) -> i32 {
+            let mut days = 0;
+            let mut sum = 0;
+            let mut i = 0;
+            while i < weights.len() {
+                sum += weights[i];
+                if sum > capacity {
+                    days += 1;
+                    sum = weights[i];
+                }
+                i += 1;
+            }
+            days + 1
+        }
 
-        let mut i = 1;
-        let mut j = piles[len - 1];
+        let mut min_capacity = std::i32::MIN;
+        let mut max_capacity = 0;
+        for &w in weights.iter() {
+            min_capacity = std::cmp::max(min_capacity, w);
+            max_capacity += w;
+        }
+
+        let mut i = min_capacity;
+        let mut j = max_capacity;
         while i <= j {
-            let k = i + (j - i) / 2;
-            let eat_up_hours = piles.iter().map(|&pile| (pile + k - 1) / k).sum::<i32>();
-            if eat_up_hours <= h {
-                j = k - 1;
+            let capacity = i + (j - i) / 2;
+            if ship_days(&weights, capacity) <= d {
+                j = capacity - 1;
             } else {
-                i = k + 1;
+                i = capacity + 1;
             }
         }
         j + 1
@@ -27,7 +45,7 @@ impl Solution {
 }
 
 fn main() {
-    assert_eq!(4, Solution::min_eating_speed(vec![3, 6, 7, 11], 8));
-    assert_eq!(30, Solution::min_eating_speed(vec![30, 11, 23, 4, 20], 5));
-    assert_eq!(23, Solution::min_eating_speed(vec![30, 11, 23, 4, 20], 6));
+    assert_eq!(15, Solution::ship_within_days(vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 5));
+    assert_eq!(6, Solution::ship_within_days(vec![3, 2, 2, 4, 1, 4], 3));
+    assert_eq!(3, Solution::ship_within_days(vec![1, 2, 3, 1, 1], 4));
 }
