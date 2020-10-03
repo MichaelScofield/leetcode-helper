@@ -3,60 +3,31 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn preimage_size_fzf(k: i32) -> i32 {
-        assert!(k >= 0);
+    pub fn min_eating_speed(piles: Vec<i32>, h: i32) -> i32 {
+        let len = piles.len();
+        assert!(len > 0);
+        assert!(h >= len as i32);
 
-        fn left_bound(k: i64) -> i64 {
-            let mut l = 0;
-            let mut h = std::i64::MAX;
-            while l <= h {
-                let mid = l + (h - l) / 2;
-                let zeroes = Solution::trailing_zeroes(mid);
-                if zeroes == k {
-                    h = mid - 1;
-                } else if zeroes < k {
-                    l = mid + 1;
-                } else {
-                    h = mid - 1;
-                }
+        let piles = &mut { piles };
+        piles.sort();
+
+        let mut i = 1;
+        let mut j = piles[len - 1];
+        while i <= j {
+            let k = i + (j - i) / 2;
+            let eat_up_hours = piles.iter().map(|&pile| (pile + k - 1) / k).sum::<i32>();
+            if eat_up_hours <= h {
+                j = k - 1;
+            } else {
+                i = k + 1;
             }
-            h + 1
         }
-
-        fn right_bound(k: i64) -> i64 {
-            let mut l = 0;
-            let mut h = std::i64::MAX;
-            while l <= h {
-                let mid = l + (h - l) / 2;
-                let zeroes = Solution::trailing_zeroes(mid);
-                if zeroes == k {
-                    l = mid + 1;
-                } else if zeroes < k {
-                    l = mid + 1;
-                } else {
-                    h = mid - 1;
-                }
-            }
-            l - 1
-        }
-
-        let k = k as i64;
-        (right_bound(k) - left_bound(k) + 1) as i32
-    }
-
-    fn trailing_zeroes(n: i64) -> i64 {
-        let mut zeroes = 0;
-        let mut d = 1;
-        // expect "d * 5 <= n", shift multiply to the right side to avoid overflow
-        while d <= n / 5 {
-            d *= 5;
-            zeroes += n / d;
-        }
-        zeroes
+        j + 1
     }
 }
 
 fn main() {
-    assert_eq!(5, Solution::preimage_size_fzf(0));
-    assert_eq!(0, Solution::preimage_size_fzf(5));
+    assert_eq!(4, Solution::min_eating_speed(vec![3, 6, 7, 11], 8));
+    assert_eq!(30, Solution::min_eating_speed(vec![30, 11, 23, 4, 20], 5));
+    assert_eq!(23, Solution::min_eating_speed(vec![30, 11, 23, 4, 20], 6));
 }
