@@ -1,42 +1,57 @@
-import java.util.Arrays;
-import java.util.Random;
+public class Solution {
 
-class Solution {
-
-    final int[] nums;
-
-    public Solution(int[] nums) {
-        this.nums = nums;
-    }
-
-    public int[] reset() {
-        return nums;
-    }
-
-    public int[] shuffle() {
-        int[] copy = Arrays.copyOf(nums, nums.length);
-        Random random = new Random(System.nanoTime());
-        for (int i = copy.length - 1; i > 0; i--) {
-            int r = random.nextInt(i + 1);
-            if (i != r) {
-                swap(copy, i, r);
-            }
+    public ListNode reverseKGroup(ListNode head, int k) {
+        if (head == null) {
+            return null;
         }
-        return copy;
+        ListNode newHead = null;
+        ListNode lastTail = null;
+        ListNode subListHead = head;
+        while (subListHead != null) {
+            ListNode subListTail = subListHead;
+            for (int i = 0; i < k; i++) {
+                if (subListTail == null) {
+                    return newHead;
+                }
+                subListTail = subListTail.next;
+            }
+            ListNode reversedHead = reverse(subListHead, k);
+            if (newHead == null) {
+                newHead = reversedHead;
+            }
+            if (lastTail != null) {
+                lastTail.next = reversedHead;
+            }
+            lastTail = subListHead;
+            lastTail.next = subListTail;
+            subListHead = subListTail;
+        }
+        return newHead;
     }
 
-    void swap(int[] nums, int i, int j) {
-        int tmp = nums[i];
-        nums[i] = nums[j];
-        nums[j] = tmp;
+    ListNode reverse(ListNode node, int len) {
+        assert node != null;
+        ListNode prev = null;
+        ListNode curr = node;
+        int i = 0;
+        while (curr != null && i++ < len) {
+            ListNode next = curr.next;
+            curr.next = prev;
+            prev = curr;
+            curr = next;
+        }
+        node.next = curr;
+        return prev;
     }
 
     public static void main(String[] args) {
-        Solution solution = new Solution(new int[]{1, 2, 3});
-        System.out.println(Arrays.toString(solution.shuffle()));
-        System.out.println(Arrays.toString(solution.reset()));
-        for (int i = 0; i < 10; i++) {
-            System.out.println(Arrays.toString(solution.shuffle()));
-        }
+        Solution solution = new Solution();
+        ListNode head;
+        head = ListNode.from(new Integer[]{1, 2, 3, 4, 5}, null);
+        ListNode.printList(solution.reverseKGroup(head, 2));
+        head = ListNode.from(new Integer[]{1, 2, 3, 4, 5}, null);
+        ListNode.printList(solution.reverseKGroup(head, 3));
+        head = ListNode.from(new Integer[]{1, 2, 3, 4, 5, 6}, null);
+        ListNode.printList(solution.reverseKGroup(head, 3));
     }
 }
