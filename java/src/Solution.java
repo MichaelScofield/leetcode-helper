@@ -1,57 +1,57 @@
 public class Solution {
 
-    public ListNode reverseKGroup(ListNode head, int k) {
+    public boolean isPalindrome(ListNode head) {
         if (head == null) {
-            return null;
+            return true;
         }
-        ListNode newHead = null;
-        ListNode lastTail = null;
-        ListNode subListHead = head;
-        while (subListHead != null) {
-            ListNode subListTail = subListHead;
-            for (int i = 0; i < k; i++) {
-                if (subListTail == null) {
-                    return newHead;
-                }
-                subListTail = subListTail.next;
+        int len = 0;
+        ListNode slow = head, fast = head;
+        while (fast != null) {
+            fast = fast.next;
+            if (fast != null) {
+                fast = fast.next;
+                len += 2;
+            } else {
+                len += 1;
             }
-            ListNode reversedHead = reverse(subListHead, k);
-            if (newHead == null) {
-                newHead = reversedHead;
-            }
-            if (lastTail != null) {
-                lastTail.next = reversedHead;
-            }
-            lastTail = subListHead;
-            lastTail.next = subListTail;
-            subListHead = subListTail;
+            slow = slow.next;
         }
-        return newHead;
+        if (len == 1) {
+            return true;
+        }
+        ListNode reverse = reverse(slow);
+        while (reverse != null) {
+            if (head.val != reverse.val) {
+                return false;
+            }
+            head = head.next;
+            reverse = reverse.next;
+        }
+        return true;
     }
 
-    ListNode reverse(ListNode node, int len) {
-        assert node != null;
+    ListNode reverse(ListNode node) {
         ListNode prev = null;
         ListNode curr = node;
-        int i = 0;
-        while (curr != null && i++ < len) {
+        while (curr != null) {
             ListNode next = curr.next;
             curr.next = prev;
             prev = curr;
             curr = next;
         }
-        node.next = curr;
         return prev;
     }
 
     public static void main(String[] args) {
         Solution solution = new Solution();
         ListNode head;
-        head = ListNode.from(new Integer[]{1, 2, 3, 4, 5}, null);
-        ListNode.printList(solution.reverseKGroup(head, 2));
-        head = ListNode.from(new Integer[]{1, 2, 3, 4, 5}, null);
-        ListNode.printList(solution.reverseKGroup(head, 3));
-        head = ListNode.from(new Integer[]{1, 2, 3, 4, 5, 6}, null);
-        ListNode.printList(solution.reverseKGroup(head, 3));
+        head = ListNode.from(new Integer[]{1}, null);
+        System.out.println(solution.isPalindrome(head));
+        head = ListNode.from(new Integer[]{1, 2}, null);
+        System.out.println(!solution.isPalindrome(head));
+        head = ListNode.from(new Integer[]{1, 0, 0}, null);
+        System.out.println(!solution.isPalindrome(head));
+        head = ListNode.from(new Integer[]{1, 2, 2, 1}, null);
+        System.out.println(solution.isPalindrome(head));
     }
 }
