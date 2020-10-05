@@ -2,36 +2,30 @@ import java.util.Random;
 
 public class Solution {
 
-    final ListNode head;
+    final int[] nums;
 
-    /**
-     * @param head The linked list's head.
-     *             Note that the head is guaranteed to be not null, so it contains at least one node.
-     */
-    public Solution(ListNode head) {
-        this.head = head;
+    public Solution(int[] nums) {
+        this.nums = nums;
     }
 
-    /**
-     * Returns a random node's value.
-     */
-    public int getRandom() {
-        int i = 1;
-        int result = 0;
+    public int pick(int target) {
+        int pick = 0;
+        int n = 1;
         Random random = new Random();
-        for (ListNode curr = head; curr != null; curr = curr.next) {
-            if (random.nextInt(i++) == 0) {
-                result = curr.val;
+        for (int i = 0; i < nums.length; i++) {
+            if (nums[i] == target && random.nextInt(n++) == 0) {
+                pick = i;
             }
         }
-        return result;
+        return pick;
     }
 
     public static void main(String[] args) {
-        ListNode head = ListNode.from(new Integer[]{1, 2, 3}, null);
-        Solution solution = new Solution(head);
+        int[] nums = new int[]{1, 2, 3, 3, 3};
+        Solution solution = new Solution(nums);
         for (int i = 0; i < 10; i++) {
-            System.out.println(solution.getRandom());
+            System.out.println(solution.pick(3));
+            System.out.println(solution.pick(1));
         }
     }
 }
