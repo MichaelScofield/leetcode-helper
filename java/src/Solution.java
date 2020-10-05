@@ -1,57 +1,37 @@
+import java.util.Random;
+
 public class Solution {
 
-    public boolean isPalindrome(ListNode head) {
-        if (head == null) {
-            return true;
-        }
-        int len = 0;
-        ListNode slow = head, fast = head;
-        while (fast != null) {
-            fast = fast.next;
-            if (fast != null) {
-                fast = fast.next;
-                len += 2;
-            } else {
-                len += 1;
-            }
-            slow = slow.next;
-        }
-        if (len == 1) {
-            return true;
-        }
-        ListNode reverse = reverse(slow);
-        while (reverse != null) {
-            if (head.val != reverse.val) {
-                return false;
-            }
-            head = head.next;
-            reverse = reverse.next;
-        }
-        return true;
+    final ListNode head;
+
+    /**
+     * @param head The linked list's head.
+     *             Note that the head is guaranteed to be not null, so it contains at least one node.
+     */
+    public Solution(ListNode head) {
+        this.head = head;
     }
 
-    ListNode reverse(ListNode node) {
-        ListNode prev = null;
-        ListNode curr = node;
-        while (curr != null) {
-            ListNode next = curr.next;
-            curr.next = prev;
-            prev = curr;
-            curr = next;
+    /**
+     * Returns a random node's value.
+     */
+    public int getRandom() {
+        int i = 1;
+        int result = 0;
+        Random random = new Random();
+        for (ListNode curr = head; curr != null; curr = curr.next) {
+            if (random.nextInt(i++) == 0) {
+                result = curr.val;
+            }
         }
-        return prev;
+        return result;
     }
 
     public static void main(String[] args) {
-        Solution solution = new Solution();
-        ListNode head;
-        head = ListNode.from(new Integer[]{1}, null);
-        System.out.println(solution.isPalindrome(head));
-        head = ListNode.from(new Integer[]{1, 2}, null);
-        System.out.println(!solution.isPalindrome(head));
-        head = ListNode.from(new Integer[]{1, 0, 0}, null);
-        System.out.println(!solution.isPalindrome(head));
-        head = ListNode.from(new Integer[]{1, 2, 2, 1}, null);
-        System.out.println(solution.isPalindrome(head));
+        ListNode head = ListNode.from(new Integer[]{1, 2, 3}, null);
+        Solution solution = new Solution(head);
+        for (int i = 0; i < 10; i++) {
+            System.out.println(solution.getRandom());
+        }
     }
 }
