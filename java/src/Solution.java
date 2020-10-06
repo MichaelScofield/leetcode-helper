@@ -1,32 +1,35 @@
 public class Solution {
 
-    public TreeNode constructMaximumBinaryTree(int[] nums) {
-        if (nums == null || nums.length == 0) {
+    public TreeNode buildTree(int[] inorder, int[] postorder) {
+        if (inorder == null || postorder == null
+                || inorder.length != postorder.length
+                || inorder.length < 1) {
             return null;
         }
-        return constructMaximumBinaryTree(nums, 0, nums.length);
+        return buildTree(inorder, 0, inorder.length - 1, postorder, 0, postorder.length - 1);
     }
 
-    TreeNode constructMaximumBinaryTree(int[] nums, int l, int r) {
-        if (l >= r) {
+    TreeNode buildTree(int[] inorder, int p, int q, int[] postorder, int x, int y) {
+        if (p > q || x > y) {
             return null;
         }
-        int max = nums[l];
-        int p = l;
-        for (int i = l + 1; i < r; i++) {
-            if (nums[i] > max) {
-                max = nums[i];
-                p = i;
+        TreeNode root = new TreeNode(postorder[y]);
+        int i;
+        for (i = p; i <= q; i++) {
+            if (inorder[i] == root.val) {
+                break;
             }
         }
-        TreeNode root = new TreeNode(max);
-        root.left = constructMaximumBinaryTree(nums, l, p);
-        root.right = constructMaximumBinaryTree(nums, p + 1, r);
+        root.left = buildTree(inorder, p, i - 1, postorder, x, x + (i - p) - 1);
+        root.right = buildTree(inorder, i + 1, q, postorder, x + (i - p), y - 1);
         return root;
     }
 
     public static void main(String[] args) {
         Solution solution = new Solution();
-        TreeNode.printTree(solution.constructMaximumBinaryTree(new int[]{3, 2, 1, 6, 0, 5}));
+        int[] inorder = new int[]{9, 3, 15, 20, 7};
+        int[] postorder = new int[]{9, 15, 7, 20, 3};
+        TreeNode root = solution.buildTree(inorder, postorder);
+        TreeNode.printTree(root);
     }
 }
