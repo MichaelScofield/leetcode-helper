@@ -1,35 +1,40 @@
+import java.util.Collections;
+import java.util.Stack;
+
 public class Solution {
 
-    public TreeNode buildTree(int[] inorder, int[] postorder) {
-        if (inorder == null || postorder == null
-                || inorder.length != postorder.length
-                || inorder.length < 1) {
-            return null;
+    public String smallestSubsequence(String s) {
+        char[] chars = s.toCharArray();
+        int[] charsCount = new int[26];
+        for (char c : chars) {
+            charsCount[c - 'a'] += 1;
         }
-        return buildTree(inorder, 0, inorder.length - 1, postorder, 0, postorder.length - 1);
-    }
-
-    TreeNode buildTree(int[] inorder, int p, int q, int[] postorder, int x, int y) {
-        if (p > q || x > y) {
-            return null;
-        }
-        TreeNode root = new TreeNode(postorder[y]);
-        int i;
-        for (i = p; i <= q; i++) {
-            if (inorder[i] == root.val) {
-                break;
+        Stack<Character> stack = new Stack<>();
+        boolean[] isInStack = new boolean[26];
+        for (char c : chars) {
+            charsCount[c - 'a'] -= 1;
+            if (isInStack[c - 'a']) {
+                continue;
             }
+            while (!stack.isEmpty() && c < stack.peek() && charsCount[stack.peek() - 'a'] > 0) {
+                isInStack[stack.pop() - 'a'] = false;
+            }
+            stack.push(c);
+            isInStack[c - 'a'] = true;
         }
-        root.left = buildTree(inorder, p, i - 1, postorder, x, x + (i - p) - 1);
-        root.right = buildTree(inorder, i + 1, q, postorder, x + (i - p), y - 1);
-        return root;
+        Collections.reverse(stack);
+        char[] result = new char[stack.size()];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = stack.pop();
+        }
+        return new String(result);
     }
 
     public static void main(String[] args) {
         Solution solution = new Solution();
-        int[] inorder = new int[]{9, 3, 15, 20, 7};
-        int[] postorder = new int[]{9, 15, 7, 20, 3};
-        TreeNode root = solution.buildTree(inorder, postorder);
-        TreeNode.printTree(root);
+        System.out.println(solution.smallestSubsequence("cdadabcc").equals("adbc"));
+        System.out.println(solution.smallestSubsequence("abcd").equals("abcd"));
+        System.out.println(solution.smallestSubsequence("ecbacba").equals("eacb"));
+        System.out.println(solution.smallestSubsequence("leetcode").equals("letcod"));
     }
 }
