@@ -3,7 +3,7 @@ import java.util.Stack;
 
 public class Solution {
 
-    public String smallestSubsequence(String s) {
+    public String removeDuplicateLetters(String s) {
         char[] chars = s.toCharArray();
         int[] charsCount = new int[26];
         for (char c : chars) {
@@ -32,9 +32,9 @@ public class Solution {
 
     public static void main(String[] args) {
         Solution solution = new Solution();
-        System.out.println(solution.smallestSubsequence("cdadabcc").equals("adbc"));
-        System.out.println(solution.smallestSubsequence("abcd").equals("abcd"));
-        System.out.println(solution.smallestSubsequence("ecbacba").equals("eacb"));
-        System.out.println(solution.smallestSubsequence("leetcode").equals("letcod"));
+        System.out.println(solution.removeDuplicateLetters("cdadabcc").equals("adbc"));
+        System.out.println(solution.removeDuplicateLetters("abcd").equals("abcd"));
+        System.out.println(solution.removeDuplicateLetters("ecbacba").equals("eacb"));
+        System.out.println(solution.removeDuplicateLetters("leetcode").equals("letcod"));
     }
 }
