@@ -3,21 +3,35 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn corp_flight_bookings(bookings: Vec<Vec<i32>>, n: i32) -> Vec<i32> {
-        let mut diff = vec![0; n as usize];
-        for booking in bookings.iter() {
-            diff[booking[0] as usize - 1] += booking[2];
-            if booking[1] < n {
-                diff[booking[1] as usize] -= booking[2];
+    pub fn longest_palindrome_subseq(s: String) -> i32 {
+        let bytes = s.as_bytes();
+        let len = bytes.len();
+        let mut dp = vec![vec![0; len]; len];
+        for i in 0..len {
+            dp[i][i] = 1;
+        }
+        for j in 1..len {
+            for i in (0..j).rev() {
+                let mut equal_index = None;
+                for x in i..j {
+                    if bytes[x] == bytes[j] {
+                        equal_index = Some(x);
+                        break;
+                    }
+                }
+                dp[i][j] = if let Some(x) = equal_index {
+                    std::cmp::max(dp[x + 1][j - 1] + 2, dp[i][j - 1])
+                } else {
+                    dp[i][j - 1]
+                }
             }
         }
-        for i in 1..diff.len() {
-            diff[i] += diff[i - 1];
-        }
-        diff
+        dp[0][len - 1]
     }
 }
 
 fn main() {
-    assert_eq!(vec![10, 55, 45, 25, 25], Solution::corp_flight_bookings(vecvec![[1,2,10],[2,3,20],[2,5,25]], 5));
+    assert_eq!(6, Solution::longest_palindrome_subseq("abaabaa".to_string()));
+    assert_eq!(4, Solution::longest_palindrome_subseq("bbbab".to_string()));
+    assert_eq!(2, Solution::longest_palindrome_subseq("cbbd".to_string()));
 }
