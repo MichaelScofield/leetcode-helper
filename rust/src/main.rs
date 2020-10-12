@@ -3,24 +3,27 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn max_coins(nums: Vec<i32>) -> i32 {
-        let len = nums.len();
-        let mut dp = vec![vec![0; len + 2]; len + 2];
-        for j in 1..=(len + 1) {
+    pub fn min_insertions(s: String) -> i32 {
+        let bytes = s.as_bytes();
+        let len = bytes.len();
+        let mut dp = vec![vec![0; len]; len];
+        for j in 0..len {
             for i in (0..j).rev() {
-                for k in (i + 1)..j {
-                    let curr = nums[k - 1];
-                    let left = if i == 0 { 1 } else { nums[i - 1] };
-                    let right = if j == len + 1 { 1 } else { nums[j - 1] };
-                    dp[i][j] = std::cmp::max(dp[i][j],
-                                             dp[i][k] + dp[k][j] + left * curr * right);
+                if bytes[i] == bytes[j] {
+                    dp[i][j] = dp[i + 1][j - 1];
+                } else {
+                    dp[i][j] = std::cmp::min(dp[i + 1][j], dp[i][j - 1]) + 1;
                 }
             }
         }
-        dp[0][len + 1]
+        dp[0][len - 1]
     }
 }
 
 fn main() {
-    assert_eq!(167, Solution::max_coins(vec![3, 1, 5, 8]));
+    assert_eq!(0, Solution::min_insertions("zzazz".to_string()));
+    assert_eq!(2, Solution::min_insertions("mbadm".to_string()));
+    assert_eq!(5, Solution::min_insertions("leetcode".to_string()));
+    assert_eq!(0, Solution::min_insertions("g".to_string()));
+    assert_eq!(1, Solution::min_insertions("no".to_string()));
 }
