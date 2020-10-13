@@ -3,27 +3,24 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn min_insertions(s: String) -> i32 {
-        let bytes = s.as_bytes();
-        let len = bytes.len();
-        let mut dp = vec![vec![0; len]; len];
-        for j in 0..len {
-            for i in (0..j).rev() {
-                if bytes[i] == bytes[j] {
-                    dp[i][j] = dp[i + 1][j - 1];
-                } else {
-                    dp[i][j] = std::cmp::min(dp[i + 1][j], dp[i][j - 1]) + 1;
+    pub fn length_of_lis(nums: Vec<i32>) -> i32 {
+        let len = nums.len();
+        let mut dp = vec![1; len];
+        for i in 0..len {
+            for j in (0..i).rev() {
+                if nums[i] > nums[j] {
+                    dp[i] = std::cmp::max(dp[i], dp[j] + 1);
                 }
             }
         }
-        dp[0][len - 1]
+        dp.into_iter().max().unwrap_or(0)
     }
 }
 
 fn main() {
-    assert_eq!(0, Solution::min_insertions("zzazz".to_string()));
-    assert_eq!(2, Solution::min_insertions("mbadm".to_string()));
-    assert_eq!(5, Solution::min_insertions("leetcode".to_string()));
-    assert_eq!(0, Solution::min_insertions("g".to_string()));
-    assert_eq!(1, Solution::min_insertions("no".to_string()));
+    assert_eq!(6, Solution::length_of_lis(vec![1, 3, 6, 7, 9, 4, 10, 5, 6]));
+    assert_eq!(4, Solution::length_of_lis(vec![10, 9, 2, 5, 3, 7, 101, 18]));
+    assert_eq!(1, Solution::length_of_lis(vec![10, 9]));
+    assert_eq!(1, Solution::length_of_lis(vec![10]));
+    assert_eq!(0, Solution::length_of_lis(vec![]));
 }
