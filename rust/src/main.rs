@@ -3,24 +3,19 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn length_of_lis(nums: Vec<i32>) -> i32 {
-        let len = nums.len();
-        let mut dp = vec![1; len];
-        for i in 0..len {
-            for j in (0..i).rev() {
-                if nums[i] > nums[j] {
-                    dp[i] = std::cmp::max(dp[i], dp[j] + 1);
-                }
-            }
+    pub fn trim_mean(arr: Vec<i32>) -> f64 {
+        let arr = &mut { arr };
+        arr.sort();
+        let mut sum = 0f64;
+        let l = arr.len() * 5 / 100;
+        let r = arr.len() - l;
+        for i in l..r {
+            sum += arr[i] as f64;
         }
-        dp.into_iter().max().unwrap_or(0)
+        sum / (r - l) as f64
     }
 }
 
 fn main() {
-    assert_eq!(6, Solution::length_of_lis(vec![1, 3, 6, 7, 9, 4, 10, 5, 6]));
-    assert_eq!(4, Solution::length_of_lis(vec![10, 9, 2, 5, 3, 7, 101, 18]));
-    assert_eq!(1, Solution::length_of_lis(vec![10, 9]));
-    assert_eq!(1, Solution::length_of_lis(vec![10]));
-    assert_eq!(0, Solution::length_of_lis(vec![]));
+    println!("{:?}", Solution::trim_mean(vec![6, 0, 7, 0, 7, 5, 7, 8, 3, 4, 0, 7, 8, 1, 6, 8, 1, 1, 2, 4, 8, 1, 9, 5, 4, 3, 8, 5, 10, 8, 6, 6, 1, 0, 6, 10, 8, 2, 3, 4]));
 }
