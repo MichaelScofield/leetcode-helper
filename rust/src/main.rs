@@ -3,29 +3,39 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn get_maximum_generated(n: i32) -> i32 {
-        assert!(n >= 0 && n <= 100);
-        if n == 0 || n == 1 {
-            return n;
+    pub fn min_deletions(s: String) -> i32 {
+        assert!(s.len() > 0);
+        let letters: Vec<u8> = s.as_bytes().iter().map(|b| *b - 97).collect();
+        let mut counts = vec![0; 26];
+        for letter in letters {
+            counts[letter as usize] += 1;
         }
-        let n = n as usize;
-        let mut nums = vec![0; n + 1];
-        nums[0] = 0;
-        nums[1] = 1;
-        for i in 2..=n {
-            if i % 2 == 0 {
-                nums[i] = nums[i / 2];
-            } else {
-                nums[i] = nums[(i - 1) / 2] + nums[(i - 1) / 2 + 1];
+        counts.sort();
+
+        use std::collections::HashSet;
+        let mut set = HashSet::new();
+        let mut deletions = 0;
+        for i in 0..counts.len() {
+            let c = counts[i];
+            if c == 0 {
+                continue;
+            }
+            if set.insert(c) {
+                continue;
+            }
+            for j in (0..c).rev() {
+                if j == 0 || set.insert(j) {
+                    deletions += c - j;
+                    break;
+                }
             }
         }
-        nums.sort();
-        nums[nums.len() - 1]
+        deletions as i32
     }
 }
 
 fn main() {
-    assert_eq!(3, Solution::get_maximum_generated(7));
-    assert_eq!(1, Solution::get_maximum_generated(2));
-    assert_eq!(2, Solution::get_maximum_generated(3));
+    assert_eq!(0, Solution::min_deletions("aab".to_string()));
+    assert_eq!(2, Solution::min_deletions("aaabbbcc".to_string()));
+    assert_eq!(2, Solution::min_deletions("ceabaacb".to_string()));
 }
