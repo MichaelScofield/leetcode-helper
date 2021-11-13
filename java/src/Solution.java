@@ -1,40 +1,44 @@
-import java.util.Collections;
-import java.util.Stack;
-
 public class Solution {
 
-    public String removeDuplicateLetters(String s) {
-        char[] chars = s.toCharArray();
-        int[] charsCount = new int[26];
-        for (char c : chars) {
-            charsCount[c - 'a'] += 1;
-        }
-        Stack<Character> stack = new Stack<>();
-        boolean[] isInStack = new boolean[26];
-        for (char c : chars) {
-            charsCount[c - 'a'] -= 1;
-            if (isInStack[c - 'a']) {
-                continue;
+    public ListNode swapPairs(ListNode head) {
+        ListNode dummy = new ListNode(0);
+        dummy.next = head;
+        ListNode prev = dummy;
+        ListNode curr = head;
+        while (curr != null) {
+            ListNode next = curr.next;
+            if (next == null) {
+                break;
             }
-            while (!stack.isEmpty() && c < stack.peek() && charsCount[stack.peek() - 'a'] > 0) {
-                isInStack[stack.pop() - 'a'] = false;
-            }
-            stack.push(c);
-            isInStack[c - 'a'] = true;
+            ListNode nextnext = next.next;
+            prev.next = next;
+            next.next = curr;
+            curr.next = nextnext;
+            prev = curr;
+            curr = nextnext;
         }
-        Collections.reverse(stack);
-        char[] result = new char[stack.size()];
-        for (int i = 0; i < result.length; i++) {
-            result[i] = stack.pop();
-        }
-        return new String(result);
+        return dummy.next;
     }
 
     public static void main(String[] args) {
         Solution solution = new Solution();
-        System.out.println(solution.removeDuplicateLetters("cdadabcc").equals("adbc"));
-        System.out.println(solution.removeDuplicateLetters("abcd").equals("abcd"));
-        System.out.println(solution.removeDuplicateLetters("ecbacba").equals("eacb"));
-        System.out.println(solution.removeDuplicateLetters("leetcode").equals("letcod"));
+        ListNode expected;
+        ListNode actual;
+
+        expected = ListNode.from(new Integer[]{2, 1, 4, 3, 5}, null);
+        actual = solution.swapPairs(ListNode.from(new Integer[]{1, 2, 3, 4, 5}, null));
+        System.out.println(ListNode.isEqual(expected, actual));
+
+        expected = ListNode.from(new Integer[]{2, 1, 4, 3}, null);
+        actual = solution.swapPairs(ListNode.from(new Integer[]{1, 2, 3, 4}, null));
+        System.out.println(ListNode.isEqual(expected, actual));
+
+        expected = ListNode.from(new Integer[]{1}, null);
+        actual = solution.swapPairs(ListNode.from(new Integer[]{1}, null));
+        System.out.println(ListNode.isEqual(expected, actual));
+
+        expected = ListNode.from(new Integer[]{}, null);
+        actual = solution.swapPairs(ListNode.from(new Integer[]{}, null));
+        System.out.println(ListNode.isEqual(expected, actual));
     }
 }
