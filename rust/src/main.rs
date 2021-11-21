@@ -3,71 +3,27 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn combination_sum2(candidates: Vec<i32>, target: i32) -> Vec<Vec<i32>> {
-        assert!(candidates.len() >= 1);
-        let candidates = &mut { candidates };
-        candidates.sort();
-
-        fn combination_sum(
-            candidates: &Vec<i32>,
-            target: i32,
-            result: &mut Vec<i32>,
-            results: &mut Vec<Vec<i32>>,
-            start: usize,
-        ) {
-            let mut i = start;
-            while i < candidates.len() {
-                let candidate = candidates[i];
-                if target < candidate {
-                    return;
-                }
-                result.push(candidate);
-                if target == candidate {
-                    results.push(result.clone());
-                } else {
-                    combination_sum(&candidates, target - candidate, result, results, i + 1);
-                }
-                let last = result.pop().unwrap();
-                while i < candidates.len() {
-                    if candidates[i] != last {
-                        break;
-                    }
-                    i += 1;
-                }
+    pub fn permute_unique(nums: Vec<i32>) -> Vec<Vec<i32>> {
+        assert!(nums.len() >= 1);
+        use std::collections::HashSet;
+        fn permute(nums: Vec<i32>, i: usize, rs: &mut HashSet<Vec<i32>>) {
+            if i == nums.len() {
+                rs.insert(nums);
+                return;
+            }
+            for j in i..nums.len() {
+                let mut nums = nums.clone();
+                nums.swap(i, j);
+                permute(nums, i + 1, rs);
             }
         }
-
-        let mut results = vec![];
-        let mut result = vec![];
-        combination_sum(candidates, target, &mut result, &mut results, 0);
-        results
+        let mut rs = HashSet::new();
+        permute(nums, 0, &mut rs);
+        rs.into_iter().collect()
     }
 }
 
 fn main() {
-    assert_eq!(
-        vecvec![[1, 1, 6], [1, 2, 5], [1, 7], [2, 6]],
-        Solution::combination_sum2(vec![10, 1, 2, 7, 6, 1, 5], 8)
-    );
-    assert_eq!(
-        vecvec![[1, 2, 2], [5]],
-        Solution::combination_sum2(vec![2, 5, 2, 1, 2], 5)
-    );
-    assert_eq!(
-        vecvec![[7]],
-        Solution::combination_sum2(vec![2, 3, 6, 7], 7)
-    );
-    assert_eq!(
-        vecvec![[3, 5]],
-        Solution::combination_sum2(vec![2, 3, 5], 8)
-    );
-    assert_eq!(
-        Vec::<Vec<i32>>::new(),
-        Solution::combination_sum2(vec![2], 1)
-    );
-    assert_eq!(vecvec![[1]], Solution::combination_sum2(vec![1], 1));
-    assert_eq!(
-        Vec::<Vec<i32>>::new(),
-        Solution::combination_sum2(vec![1], 2)
-    );
+    println!("{:?}", Solution::permute_unique(vec![1, 2, 3]));
+    println!("{:?}", Solution::permute_unique(vec![1, 1, 2]));
 }
