@@ -1,23 +1,30 @@
 public class Solution {
 
-    public ListNode swapPairs(ListNode head) {
-        ListNode dummy = new ListNode(0);
-        dummy.next = head;
-        ListNode prev = dummy;
+    public ListNode rotateRight(ListNode head, int k) {
+        int len = 0;
         ListNode curr = head;
         while (curr != null) {
-            ListNode next = curr.next;
-            if (next == null) {
-                break;
-            }
-            ListNode nextnext = next.next;
-            prev.next = next;
-            next.next = curr;
-            curr.next = nextnext;
-            prev = curr;
-            curr = nextnext;
+            len++;
+            curr = curr.next;
         }
-        return dummy.next;
+        if (len <= 1) {
+            return head;
+        }
+
+        int r = k % len;
+        ListNode slow = head, fast = head;
+        for (int i = 0; i < r; i++) {
+            fast = fast.next;
+        }
+        while (fast.next != null) {
+            slow = slow.next;
+            fast = fast.next;
+        }
+
+        fast.next = head;
+        head = slow.next;
+        slow.next = null;
+        return head;
     }
 
     public static void main(String[] args) {
@@ -25,20 +32,12 @@ public class Solution {
         ListNode expected;
         ListNode actual;
 
-        expected = ListNode.from(new Integer[]{2, 1, 4, 3, 5}, null);
-        actual = solution.swapPairs(ListNode.from(new Integer[]{1, 2, 3, 4, 5}, null));
+        expected = ListNode.from(new Integer[]{4, 5, 1, 2, 3}, null);
+        actual = solution.rotateRight(ListNode.from(new Integer[]{1, 2, 3, 4, 5}, null), 2);
         System.out.println(ListNode.isEqual(expected, actual));
 
-        expected = ListNode.from(new Integer[]{2, 1, 4, 3}, null);
-        actual = solution.swapPairs(ListNode.from(new Integer[]{1, 2, 3, 4}, null));
-        System.out.println(ListNode.isEqual(expected, actual));
-
-        expected = ListNode.from(new Integer[]{1}, null);
-        actual = solution.swapPairs(ListNode.from(new Integer[]{1}, null));
-        System.out.println(ListNode.isEqual(expected, actual));
-
-        expected = ListNode.from(new Integer[]{}, null);
-        actual = solution.swapPairs(ListNode.from(new Integer[]{}, null));
+        expected = ListNode.from(new Integer[]{2, 0, 1}, null);
+        actual = solution.rotateRight(ListNode.from(new Integer[]{0, 1, 2}, null), 4);
         System.out.println(ListNode.isEqual(expected, actual));
     }
 }
