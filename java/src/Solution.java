@@ -1,30 +1,33 @@
 public class Solution {
 
-    public ListNode rotateRight(ListNode head, int k) {
-        int len = 0;
-        ListNode curr = head;
-        while (curr != null) {
-            len++;
-            curr = curr.next;
-        }
-        if (len <= 1) {
+    public ListNode partition(ListNode head, int x) {
+        if (head == null || head.next == null) {
             return head;
         }
+        ListNode dummy = new ListNode();
+        dummy.next = head;
+        ListNode smaller = dummy, prev = null, curr = dummy.next;
+        while (curr != null) {
+            if (curr.val < x) {
+                ListNode smaller_next = smaller.next;
+                ListNode next = curr.next;
 
-        int r = k % len;
-        ListNode slow = head, fast = head;
-        for (int i = 0; i < r; i++) {
-            fast = fast.next;
-        }
-        while (fast.next != null) {
-            slow = slow.next;
-            fast = fast.next;
-        }
+                if (smaller_next == curr) {
+                    smaller = curr;
+                } else {
+                    smaller.next = curr;
+                    curr.next = smaller_next;
+                    smaller = smaller.next;
 
-        fast.next = head;
-        head = slow.next;
-        slow.next = null;
-        return head;
+                    prev.next = next;
+                }
+                curr = next;
+            } else {
+                prev = curr;
+                curr = curr.next;
+            }
+        }
+        return dummy.next;
     }
 
     public static void main(String[] args) {
@@ -32,12 +35,20 @@ public class Solution {
         ListNode expected;
         ListNode actual;
 
-        expected = ListNode.from(new Integer[]{4, 5, 1, 2, 3}, null);
-        actual = solution.rotateRight(ListNode.from(new Integer[]{1, 2, 3, 4, 5}, null), 2);
+        expected = ListNode.from(new Integer[]{1, 2, 3}, null);
+        actual = solution.partition(ListNode.from(new Integer[]{1, 2, 3}, null), 1);
         System.out.println(ListNode.isEqual(expected, actual));
 
-        expected = ListNode.from(new Integer[]{2, 0, 1}, null);
-        actual = solution.rotateRight(ListNode.from(new Integer[]{0, 1, 2}, null), 4);
+        expected = ListNode.from(new Integer[]{1, 2, 3}, null);
+        actual = solution.partition(ListNode.from(new Integer[]{1, 2, 3}, null), 3);
+        System.out.println(ListNode.isEqual(expected, actual));
+
+        expected = ListNode.from(new Integer[]{1, 2, 2, 4, 3, 5}, null);
+        actual = solution.partition(ListNode.from(new Integer[]{1, 4, 3, 2, 5, 2}, null), 3);
+        System.out.println(ListNode.isEqual(expected, actual));
+
+        expected = ListNode.from(new Integer[]{1, 2}, null);
+        actual = solution.partition(ListNode.from(new Integer[]{2, 1}, null), 2);
         System.out.println(ListNode.isEqual(expected, actual));
     }
 }

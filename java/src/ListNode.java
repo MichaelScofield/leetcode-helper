@@ -3,6 +3,10 @@ public class ListNode {
     int val;
     ListNode next;
 
+    ListNode() {
+        // empty
+    }
+
     ListNode(int val) {
         this.val = val;
     }
