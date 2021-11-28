@@ -3,27 +3,40 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn permute_unique(nums: Vec<i32>) -> Vec<Vec<i32>> {
+    pub fn search(nums: Vec<i32>, target: i32) -> bool {
         assert!(nums.len() >= 1);
-        use std::collections::HashSet;
-        fn permute(nums: Vec<i32>, i: usize, rs: &mut HashSet<Vec<i32>>) {
-            if i == nums.len() {
-                rs.insert(nums);
-                return;
+
+        let mut k = 1;
+        while k < nums.len() {
+            if nums[k] < nums[k - 1] {
+                break;
             }
-            for j in i..nums.len() {
-                let mut nums = nums.clone();
-                nums.swap(i, j);
-                permute(nums, i + 1, rs);
+            k += 1;
+        }
+
+        let get = |i: usize| -> i32 { nums[(i + k) % nums.len()] };
+        let mut i = 0;
+        let mut j = nums.len() - 1;
+        while i <= j {
+            let mid = i + (j - i) / 2;
+            if get(mid) == target {
+                return true;
+            } else if get(mid) < target {
+                i = mid + 1;
+            } else {
+                j = if mid == 0 { break } else { mid - 1 };
             }
         }
-        let mut rs = HashSet::new();
-        permute(nums, 0, &mut rs);
-        rs.into_iter().collect()
+        false
     }
 }
 
 fn main() {
-    println!("{:?}", Solution::permute_unique(vec![1, 2, 3]));
-    println!("{:?}", Solution::permute_unique(vec![1, 1, 2]));
+    assert!(Solution::search(vec![1, 2, 3, 4], 4));
+    assert!(Solution::search(vec![1, 1, 1], 1));
+    assert!(!Solution::search(vec![1, 1, 1], 2));
+    assert!(Solution::search(vec![1, 2, 3, 4], 1));
+    assert!(!Solution::search(vec![1, 2, 3, 4], 5));
+    assert!(Solution::search(vec![2, 5, 6, 0, 0, 1, 2], 0));
+    assert!(!Solution::search(vec![2, 5, 6, 0, 0, 1, 2], 3));
 }
