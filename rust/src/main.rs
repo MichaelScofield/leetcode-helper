@@ -3,28 +3,62 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn search(nums: Vec<i32>, target: i32) -> bool {
-        assert!(nums.len() >= 1);
-
-        let mut k = 1;
-        while k < nums.len() {
-            if nums[k] < nums[k - 1] {
-                break;
-            }
-            k += 1;
+    pub fn is_interleave(s1: String, s2: String, s3: String) -> bool {
+        if s1.len() == 0 {
+            return s2 == s3;
+        }
+        if s2.len() == 0 {
+            return s1 == s3;
+        }
+        if s3.len() == 0 {
+            return s1 == "" && s2 == "";
+        }
+        if s1.len() + s2.len() != s3.len() {
+            return false;
         }
 
-        let get = |i: usize| -> i32 { nums[(i + k) % nums.len()] };
-        let mut i = 0;
-        let mut j = nums.len() - 1;
-        while i <= j {
-            let mid = i + (j - i) / 2;
-            if get(mid) == target {
+        fn f(s: &str) -> Vec<Vec<String>> {
+            if s.len() == 1 {
+                return vec![vec![s.to_string()]];
+            }
+
+            let mut partitions = vec![];
+            let remaining_partitions = f(&s[1..]);
+
+            for p in remaining_partitions.iter() {
+                let mut v = vec![];
+                v.push(String::from(&s[0..1]));
+                v.append(&mut p.iter().map(String::from).collect());
+                partitions.push(v);
+            }
+
+            for p in remaining_partitions.iter() {
+                let mut v = vec![];
+
+                let mut first = String::new();
+                first.push_str(&s[0..1]);
+                first.push_str(p[0].as_str());
+                v.push(first);
+
+                v.append(&mut p[1..].iter().map(String::from).collect());
+                partitions.push(v);
+            }
+            partitions
+        }
+        let partitions = f(s3.as_str());
+
+        for partition in partitions {
+            let mut a = String::new();
+            let mut b = String::new();
+            for i in 0..partition.len() {
+                if i % 2 == 0 {
+                    a.push_str(&partition[i]);
+                } else {
+                    b.push_str(&partition[i]);
+                }
+            }
+            if a == s1 && b == s2 || a == s2 && b == s1 {
                 return true;
-            } else if get(mid) < target {
-                i = mid + 1;
-            } else {
-                j = if mid == 0 { break } else { mid - 1 };
             }
         }
         false
@@ -32,11 +66,29 @@ impl Solution {
 }
 
 fn main() {
-    assert!(Solution::search(vec![1, 2, 3, 4], 4));
-    assert!(Solution::search(vec![1, 1, 1], 1));
-    assert!(!Solution::search(vec![1, 1, 1], 2));
-    assert!(Solution::search(vec![1, 2, 3, 4], 1));
-    assert!(!Solution::search(vec![1, 2, 3, 4], 5));
-    assert!(Solution::search(vec![2, 5, 6, 0, 0, 1, 2], 0));
-    assert!(!Solution::search(vec![2, 5, 6, 0, 0, 1, 2], 3));
+    assert!(!Solution::is_interleave(
+        "abaaacbacaab".to_string(),
+        "bcccababccc".to_string(),
+        "bcccabaaaaabccaccbacabb".to_string()
+    ));
+    assert!(!Solution::is_interleave(
+        "".to_string(),
+        "abc".to_string(),
+        "abcd".to_string()
+    ));
+    assert!(Solution::is_interleave(
+        "aabcc".to_string(),
+        "dbbca".to_string(),
+        "aadbbcbcac".to_string()
+    ));
+    assert!(!Solution::is_interleave(
+        "aabcc".to_string(),
+        "dbbca".to_string(),
+        "aadbbbaccc".to_string()
+    ));
+    assert!(Solution::is_interleave(
+        "".to_string(),
+        "".to_string(),
+        "".to_string()
+    ));
 }
