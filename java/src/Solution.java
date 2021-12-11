@@ -1,54 +1,39 @@
 public class Solution {
 
-    public ListNode partition(ListNode head, int x) {
-        if (head == null || head.next == null) {
-            return head;
+    public boolean isMatch(String s, String p) {
+        int m = s == null ? 0 : s.length();
+        int n = p == null ? 0 : p.length();
+
+        boolean[][] dp = new boolean[m + 1][n + 1];
+        dp[0][0] = true;
+
+        for (int j = 1; j <= n; j++) {
+            dp[0][j] = p.charAt(j - 1) == '*' && dp[0][j - 1];
         }
-        ListNode dummy = new ListNode();
-        dummy.next = head;
-        ListNode smaller = dummy, prev = null, curr = dummy.next;
-        while (curr != null) {
-            if (curr.val < x) {
-                ListNode smaller_next = smaller.next;
-                ListNode next = curr.next;
 
-                if (smaller_next == curr) {
-                    smaller = curr;
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                char cs = s.charAt(i - 1);
+                char cp = p.charAt(j - 1);
+                if (cp == cs || cp == '?') {
+                    dp[i][j] = dp[i - 1][j - 1];
+                } else if (cp == '*') {
+                    dp[i][j] = dp[i - 1][j] || dp[i][j - 1];
                 } else {
-                    smaller.next = curr;
-                    curr.next = smaller_next;
-                    smaller = smaller.next;
-
-                    prev.next = next;
+                    dp[i][j] = false;
                 }
-                curr = next;
-            } else {
-                prev = curr;
-                curr = curr.next;
             }
         }
-        return dummy.next;
+        return dp[m][n];
     }
 
     public static void main(String[] args) {
         Solution solution = new Solution();
-        ListNode expected;
-        ListNode actual;
 
-        expected = ListNode.from(new Integer[]{1, 2, 3}, null);
-        actual = solution.partition(ListNode.from(new Integer[]{1, 2, 3}, null), 1);
-        System.out.println(ListNode.isEqual(expected, actual));
-
-        expected = ListNode.from(new Integer[]{1, 2, 3}, null);
-        actual = solution.partition(ListNode.from(new Integer[]{1, 2, 3}, null), 3);
-        System.out.println(ListNode.isEqual(expected, actual));
-
-        expected = ListNode.from(new Integer[]{1, 2, 2, 4, 3, 5}, null);
-        actual = solution.partition(ListNode.from(new Integer[]{1, 4, 3, 2, 5, 2}, null), 3);
-        System.out.println(ListNode.isEqual(expected, actual));
-
-        expected = ListNode.from(new Integer[]{1, 2}, null);
-        actual = solution.partition(ListNode.from(new Integer[]{2, 1}, null), 2);
-        System.out.println(ListNode.isEqual(expected, actual));
+        System.out.println(!solution.isMatch("aa", "a"));
+        System.out.println(solution.isMatch("aa", "*"));
+        System.out.println(!solution.isMatch("cb", "?a"));
+        System.out.println(solution.isMatch("adceb", "*a*b"));
+        System.out.println(!solution.isMatch("acdcb", "a*c?b"));
     }
 }
