@@ -1,41 +1,38 @@
+use crate::helper::util::to_string_vec;
+
 mod helper;
 
 struct Solution;
 
 impl Solution {
-    pub fn first_missing_positive(nums: Vec<i32>) -> i32 {
-        assert!(nums.len() >= 1);
-        let nums = &mut { nums };
+    pub fn group_anagrams(strs: Vec<String>) -> Vec<Vec<String>> {
+        assert!(strs.len() >= 1);
 
-        let mut i = 0;
-        while i < nums.len() {
-            if nums[i] > 0 {
-                let j = (nums[i] - 1) as usize;
-                if j < nums.len() && j as i32 != nums[j] - 1 {
-                    let t = nums[j];
-                    nums[j] = nums[i];
-                    nums[i] = t;
-                    continue;
-                }
-            }
+        let calc_key = |str: &str| -> String {
+            let mut bytes = str.as_bytes().to_vec();
+            bytes.sort();
+            unsafe { String::from_utf8_unchecked(bytes) }
+        };
 
-            i += 1;
+        use std::collections::HashMap;
+        let mut groups = HashMap::new();
+        for str in strs {
+            let m = calc_key(&str);
+            groups.entry(m).or_insert_with(|| Vec::new()).push(str);
         }
-
-        for i in 0..nums.len() {
-            if nums[i] != i as i32 + 1 {
-                return i as i32 + 1;
-            }
-        }
-        nums.len() as i32 + 1
+        groups.into_iter().map(|e| e.1).collect()
     }
 }
 
 fn main() {
-    assert_eq!(3, Solution::first_missing_positive(vec![1, 2, 0]));
-    assert_eq!(2, Solution::first_missing_positive(vec![1, 1]));
-    assert_eq!(4, Solution::first_missing_positive(vec![1, 2, 3]));
-    assert_eq!(1, Solution::first_missing_positive(vec![4, 2, 3]));
-    assert_eq!(2, Solution::first_missing_positive(vec![3, 4, -1, 1]));
-    assert_eq!(1, Solution::first_missing_positive(vec![7, 8, 9, 11, 12]));
+    let strs = to_string_vec(vec![
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab"]);
+    println!("{:?}", Solution::group_anagrams(strs));
+    let strs = to_string_vec(vec!["eat", "tea", "tan", "ate", "nat", "bat"]);
+    println!("{:?}", Solution::group_anagrams(strs));
+    let strs = to_string_vec(vec!["aaa", "aaa", "bb", "bb", "a", "a"]);
+    println!("{:?}", Solution::group_anagrams(strs));
+    let strs = to_string_vec(vec![""]);
+    println!("{:?}", Solution::group_anagrams(strs));
 }
