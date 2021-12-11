@@ -7,31 +7,27 @@ impl Solution {
         assert!(nums.len() >= 1);
         let nums = &mut { nums };
 
-        for num in nums.iter_mut() {
-            if *num <= 0 {
-                *num = i32::MAX;
-            }
-        }
-
-        for i in 0..nums.len() {
-            if nums[i] == i32::MAX {
-                continue;
-            }
-
-            let j = (nums[i].abs() - 1) as usize;
-            if j < nums.len() {
-                if nums[j] > 0 {
-                    nums[j] = -nums[j];
+        let mut i = 0;
+        while i < nums.len() {
+            if nums[i] > 0 {
+                let j = (nums[i] - 1) as usize;
+                if j < nums.len() && j as i32 != nums[j] - 1 {
+                    let t = nums[j];
+                    nums[j] = nums[i];
+                    nums[i] = t;
+                    continue;
                 }
             }
+
+            i += 1;
         }
 
         for i in 0..nums.len() {
-            if nums[i] > 0 {
-                return (i + 1) as i32;
+            if nums[i] != i as i32 + 1 {
+                return i as i32 + 1;
             }
         }
-        (nums.len() + 1) as i32
+        nums.len() as i32 + 1
     }
 }
 
