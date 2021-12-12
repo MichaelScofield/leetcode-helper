@@ -3,104 +3,55 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn total_n_queens(n: i32) -> i32 {
-        assert!(n >= 1);
-        Solution::solve_n_queens(n).len() as i32
+    pub fn get_permutation(n: i32, k: i32) -> String {
+        assert!(n >= 1 && k >= 1);
+        let mut v = (1..=n).collect::<Vec<i32>>();
+        for _ in 1..k {
+            Solution::next_permutation(&mut v);
+        }
+        let mut s = String::with_capacity(v.len());
+        for x in v {
+            s.push(char::from_digit(x as u32, 10).unwrap())
+        }
+        s
     }
 
-    fn solve_n_queens(n: i32) -> Vec<Vec<String>> {
-        fn place_queue(board: &mut Vec<Vec<u8>>, i: usize, start: usize) -> i32 {
-            let mut j = -1;
-            for (y, x) in board[i].iter_mut().skip(start).enumerate() {
-                if *x == b'0' {
-                    j = (y + start) as i32;
-                    break;
-                }
+    fn next_permutation(nums: &mut Vec<i32>) {
+        assert!(nums.len() >= 1);
+
+        // find not increasing subsequence's starting index from right
+        let mut non_increasing_i = nums.len() - 1;
+        while non_increasing_i > 0 {
+            if nums[non_increasing_i - 1] < nums[non_increasing_i] {
+                break;
             }
-            let n = board.len();
-            if j < 0 {
-                return -1;
-            }
-            let j = j as usize;
-            board[i].iter_mut().for_each(|x| *x = b'.');
-            board.iter_mut().for_each(|line| line[j] = b'.');
-            let (mut x, mut y) = (i, j);
-            loop {
-                board[x][y] = b'.';
-                if x == n - 1 || y == n - 1 {
-                    break;
-                }
-                x += 1;
-                y += 1;
-            }
-            let (mut x, mut y) = (i, j);
-            loop {
-                board[x][y] = b'.';
-                if x == 0 || y == 0 {
-                    break;
-                }
-                x -= 1;
-                y -= 1;
-            }
-            let (mut x, mut y) = (i, j);
-            loop {
-                board[x][y] = b'.';
-                if x == n - 1 || y == 0 {
-                    break;
-                }
-                x += 1;
-                y -= 1;
-            }
-            let (mut x, mut y) = (i, j);
-            loop {
-                board[x][y] = b'.';
-                if x == 0 || y == n - 1 {
-                    break;
-                }
-                x -= 1;
-                y += 1;
-            }
-            board[i][j] = b'Q';
-            j as i32
+            non_increasing_i -= 1;
+        }
+        // already the largest permutation, reverse to get the smallest
+        if non_increasing_i == 0 {
+            nums.reverse();
+            return;
         }
 
-        fn solve_n_queens(board: &mut Vec<Vec<u8>>, i: usize, res: &mut Vec<Vec<Vec<u8>>>) {
-            if i == board.len() {
-                res.push(board.to_owned());
-                return;
+        // find the num that is just larger
+        let mut larger_i = nums.len() - 1;
+        while larger_i >= non_increasing_i {
+            if nums[larger_i] > nums[non_increasing_i - 1] {
+                break;
             }
-            let mut j = 0;
-            loop {
-                if j >= board.len() {
-                    break;
-                }
-                let mut board = board.clone();
-                let place = place_queue(&mut board, i, j);
-                if place >= 0 {
-                    solve_n_queens(&mut board, i + 1, res);
-                    j = place as usize + 1;
-                } else {
-                    break;
-                }
-            }
+            larger_i -= 1;
         }
 
-        let n = n as usize;
-        let mut board = vec![vec![b'0'; n]; n];
-        let mut res = vec![];
-        solve_n_queens(&mut board, 0, &mut res);
-        res.into_iter()
-            .map(|board| {
-                board
-                    .into_iter()
-                    .map(|line| String::from_utf8(line).unwrap())
-                    .collect()
-            })
-            .collect()
+        // swap the larger out
+        nums.swap(non_increasing_i - 1, larger_i);
+
+        // reverse to make the new subsequence starting from smallest
+        nums[non_increasing_i..].reverse();
     }
 }
 
 fn main() {
-    assert_eq!(2, Solution::total_n_queens(4));
-    assert_eq!(1, Solution::total_n_queens(1));
+    assert_eq!("213".to_string(), Solution::get_permutation(3, 3));
+    assert_eq!("2314".to_string(), Solution::get_permutation(4, 9));
+    assert_eq!("123".to_string(), Solution::get_permutation(3, 1));
 }
