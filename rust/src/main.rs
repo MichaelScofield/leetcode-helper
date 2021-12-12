@@ -3,55 +3,102 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn get_permutation(n: i32, k: i32) -> String {
-        assert!(n >= 1 && k >= 1);
-        let mut v = (1..=n).collect::<Vec<i32>>();
-        for _ in 1..k {
-            Solution::next_permutation(&mut v);
-        }
-        let mut s = String::with_capacity(v.len());
-        for x in v {
-            s.push(char::from_digit(x as u32, 10).unwrap())
-        }
-        s
-    }
+    pub fn is_number(s: String) -> bool {
+        assert!(s.len() >= 1);
 
-    fn next_permutation(nums: &mut Vec<i32>) {
-        assert!(nums.len() >= 1);
+        #[derive(PartialEq)]
+        enum Number {
+            Decimal,
+            Integer,
+        }
 
-        // find not increasing subsequence's starting index from right
-        let mut non_increasing_i = nums.len() - 1;
-        while non_increasing_i > 0 {
-            if nums[non_increasing_i - 1] < nums[non_increasing_i] {
-                break;
+        fn is_number(chars: &[char]) -> Option<Number> {
+            #[derive(PartialEq)]
+            enum ParsingState {
+                CheckSign,
+                CheckInteger,
+                CheckDecimal,
             }
-            non_increasing_i -= 1;
-        }
-        // already the largest permutation, reverse to get the smallest
-        if non_increasing_i == 0 {
-            nums.reverse();
-            return;
-        }
+            let mut parsing_state = ParsingState::CheckSign;
 
-        // find the num that is just larger
-        let mut larger_i = nums.len() - 1;
-        while larger_i >= non_increasing_i {
-            if nums[larger_i] > nums[non_increasing_i - 1] {
-                break;
+            let mut has_digit = false;
+            for c in chars {
+                match *c {
+                    '+' | '-' => {
+                        if parsing_state != ParsingState::CheckSign {
+                            return None;
+                        }
+                        parsing_state = ParsingState::CheckInteger;
+                    }
+                    _ if c.is_digit(10) => {
+                        if parsing_state == ParsingState::CheckSign {
+                            parsing_state = ParsingState::CheckInteger;
+                        }
+                        has_digit = true;
+                    }
+                    '.' => {
+                        if parsing_state == ParsingState::CheckDecimal {
+                            return None;
+                        }
+                        parsing_state = ParsingState::CheckDecimal;
+                    }
+                    _ => return None,
+                }
             }
-            larger_i -= 1;
+            if !has_digit {
+                return None;
+            }
+
+            match parsing_state {
+                ParsingState::CheckInteger => Some(Number::Integer),
+                ParsingState::CheckDecimal => Some(Number::Decimal),
+                _ => None,
+            }
         }
 
-        // swap the larger out
-        nums.swap(non_increasing_i - 1, larger_i);
+        let chars = s.chars().collect::<Vec<char>>();
+        let mut split = chars.splitn(2, |&x| x == 'e' || x == 'E');
+        if let Some(number_part) = split.next() {
+            if is_number(number_part) == None {
+                return false;
+            }
+        } else {
+            return false;
+        }
 
-        // reverse to make the new subsequence starting from smallest
-        nums[non_increasing_i..].reverse();
+        if let Some(exp_part) = split.next() {
+            if is_number(exp_part) != Some(Number::Integer) {
+                return false;
+            }
+        }
+        true
     }
 }
 
 fn main() {
-    assert_eq!("213".to_string(), Solution::get_permutation(3, 3));
-    assert_eq!("2314".to_string(), Solution::get_permutation(4, 9));
-    assert_eq!("123".to_string(), Solution::get_permutation(3, 1));
+    assert!(!Solution::is_number(".".to_string()));
+    assert!(!Solution::is_number("1e2e3".to_string()));
+    assert!(!Solution::is_number("1-2".to_string()));
+    assert!(Solution::is_number("0".to_string()));
+    assert!(!Solution::is_number("e".to_string()));
+    assert!(Solution::is_number(".1".to_string()));
+    assert!(Solution::is_number("2".to_string()));
+    assert!(Solution::is_number("0089".to_string()));
+    assert!(Solution::is_number("-0.1".to_string()));
+    assert!(Solution::is_number("+3.14".to_string()));
+    assert!(Solution::is_number("4.".to_string()));
+    assert!(Solution::is_number("-.9".to_string()));
+    assert!(Solution::is_number("2e10".to_string()));
+    assert!(Solution::is_number("-90E3".to_string()));
+    assert!(Solution::is_number("3e+7".to_string()));
+    assert!(Solution::is_number("+6e-1".to_string()));
+    assert!(Solution::is_number("53.5e93".to_string()));
+    assert!(Solution::is_number("-123.456e789".to_string()));
+    assert!(!Solution::is_number("abc".to_string()));
+    assert!(!Solution::is_number("1a".to_string()));
+    assert!(!Solution::is_number("1e".to_string()));
+    assert!(!Solution::is_number("e3".to_string()));
+    assert!(!Solution::is_number("99e2.5".to_string()));
+    assert!(!Solution::is_number("--6".to_string()));
+    assert!(!Solution::is_number("95a54e53".to_string()));
 }
