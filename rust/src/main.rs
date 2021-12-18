@@ -1,104 +1,75 @@
+use crate::helper::def::TreeNode;
+use std::cell::RefCell;
+use std::rc::Rc;
+
 mod helper;
 
 struct Solution;
 
 impl Solution {
-    pub fn is_number(s: String) -> bool {
-        assert!(s.len() >= 1);
+    pub fn recover_tree(root: &mut Option<Rc<RefCell<TreeNode>>>) {
+        assert!(root.is_some());
 
-        #[derive(PartialEq)]
-        enum Number {
-            Decimal,
-            Integer,
-        }
-
-        fn is_number(chars: &[char]) -> Option<Number> {
-            #[derive(PartialEq)]
-            enum ParsingState {
-                CheckSign,
-                CheckInteger,
-                CheckDecimal,
-            }
-            let mut parsing_state = ParsingState::CheckSign;
-
-            let mut has_digit = false;
-            for c in chars {
-                match *c {
-                    '+' | '-' => {
-                        if parsing_state != ParsingState::CheckSign {
-                            return None;
-                        }
-                        parsing_state = ParsingState::CheckInteger;
-                    }
-                    _ if c.is_digit(10) => {
-                        if parsing_state == ParsingState::CheckSign {
-                            parsing_state = ParsingState::CheckInteger;
-                        }
-                        has_digit = true;
-                    }
-                    '.' => {
-                        if parsing_state == ParsingState::CheckDecimal {
-                            return None;
-                        }
-                        parsing_state = ParsingState::CheckDecimal;
-                    }
-                    _ => return None,
+        fn inorder(
+            node: Option<Rc<RefCell<TreeNode>>>,
+            pre: &mut Option<Rc<RefCell<TreeNode>>>,
+            a: &mut Option<Rc<RefCell<TreeNode>>>,
+            b: &mut Option<Rc<RefCell<TreeNode>>>,
+        ) -> Option<Rc<RefCell<TreeNode>>> {
+            if let Some(node) = node {
+                if let Some(left) = node.borrow().left.as_ref() {
+                    *pre = inorder(Some(Rc::clone(left)), pre, a, b);
                 }
-            }
-            if !has_digit {
-                return None;
-            }
 
-            match parsing_state {
-                ParsingState::CheckInteger => Some(Number::Integer),
-                ParsingState::CheckDecimal => Some(Number::Decimal),
-                _ => None,
+                let val = node.borrow().val;
+                if let Some(pre) = pre {
+                    let pre_val = pre.borrow().val;
+                    if val < pre_val {
+                        *b = Some(Rc::clone(&node));
+                        if a.is_none() {
+                            *a = Some(Rc::clone(&pre));
+                        } else {
+                            return None;
+                        }
+                    }
+                }
+
+                return if let Some(right) = node.borrow().right.as_ref() {
+                    inorder(Some(Rc::clone(right)), &mut Some(Rc::clone(&node)), a, b)
+                } else {
+                    Some(Rc::clone(&node))
+                };
             }
+            None
         }
 
-        let chars = s.chars().collect::<Vec<char>>();
-        let mut split = chars.splitn(2, |&x| x == 'e' || x == 'E');
-        if let Some(number_part) = split.next() {
-            if is_number(number_part) == None {
-                return false;
-            }
-        } else {
-            return false;
-        }
+        let mut a = None;
+        let mut b = None;
 
-        if let Some(exp_part) = split.next() {
-            if is_number(exp_part) != Some(Number::Integer) {
-                return false;
-            }
-        }
-        true
+        let mut pre = None;
+        inorder(root.clone(), &mut pre, &mut a, &mut b);
+
+        let a = a.unwrap();
+        let b = b.unwrap();
+        let t = a.borrow().val;
+        a.borrow_mut().val = b.borrow().val;
+        b.borrow_mut().val = t;
     }
 }
 
 fn main() {
-    assert!(!Solution::is_number(".".to_string()));
-    assert!(!Solution::is_number("1e2e3".to_string()));
-    assert!(!Solution::is_number("1-2".to_string()));
-    assert!(Solution::is_number("0".to_string()));
-    assert!(!Solution::is_number("e".to_string()));
-    assert!(Solution::is_number(".1".to_string()));
-    assert!(Solution::is_number("2".to_string()));
-    assert!(Solution::is_number("0089".to_string()));
-    assert!(Solution::is_number("-0.1".to_string()));
-    assert!(Solution::is_number("+3.14".to_string()));
-    assert!(Solution::is_number("4.".to_string()));
-    assert!(Solution::is_number("-.9".to_string()));
-    assert!(Solution::is_number("2e10".to_string()));
-    assert!(Solution::is_number("-90E3".to_string()));
-    assert!(Solution::is_number("3e+7".to_string()));
-    assert!(Solution::is_number("+6e-1".to_string()));
-    assert!(Solution::is_number("53.5e93".to_string()));
-    assert!(Solution::is_number("-123.456e789".to_string()));
-    assert!(!Solution::is_number("abc".to_string()));
-    assert!(!Solution::is_number("1a".to_string()));
-    assert!(!Solution::is_number("1e".to_string()));
-    assert!(!Solution::is_number("e3".to_string()));
-    assert!(!Solution::is_number("99e2.5".to_string()));
-    assert!(!Solution::is_number("--6".to_string()));
-    assert!(!Solution::is_number("95a54e53".to_string()));
+    use helper::util::create_binary_tree;
+    use helper::util::tree_to_vec;
+
+    let mut root = create_binary_tree(vec![2, 1, -1, -1, 3]);
+    Solution::recover_tree(&mut root);
+    println!("{:?}", tree_to_vec(root));
+
+    let mut root = create_binary_tree(vec![1, 3, -1, -1, 2]);
+    Solution::recover_tree(&mut root);
+    println!("{:?}", tree_to_vec(root));
+
+    let mut root = create_binary_tree(vec![3, 1, 4, -1, -1, 2]);
+    Solution::recover_tree(&mut root);
+    println!("{:?}", tree_to_vec(root));
 }

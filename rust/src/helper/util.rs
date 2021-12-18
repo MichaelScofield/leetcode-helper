@@ -12,8 +12,7 @@ pub fn vec_to_tree(vec: Vec<Option<i32>>) -> Option<Rc<RefCell<TreeNode>>> {
         return None;
     }
     let mut i = 0;
-    let root =
-        Rc::new(RefCell::new(TreeNode::new(vec[i].unwrap())));
+    let root = Rc::new(RefCell::new(TreeNode::new(vec[i].unwrap())));
     i += 1;
 
     let mut queue = VecDeque::new();
@@ -26,8 +25,7 @@ pub fn vec_to_tree(vec: Vec<Option<i32>>) -> Option<Rc<RefCell<TreeNode>>> {
         let node = queue.pop_front().unwrap();
         let next_val = vec[i];
         if let Some(left_node_val) = next_val {
-            let left_node =
-                Rc::new(RefCell::new(TreeNode::new(left_node_val)));
+            let left_node = Rc::new(RefCell::new(TreeNode::new(left_node_val)));
             node.borrow_mut().left = Some(Rc::clone(&left_node));
 
             queue.push_back(Rc::clone(&left_node));
@@ -39,8 +37,7 @@ pub fn vec_to_tree(vec: Vec<Option<i32>>) -> Option<Rc<RefCell<TreeNode>>> {
         }
         let next_val = vec[i];
         if let Some(right_node_val) = next_val {
-            let right_node =
-                Rc::new(RefCell::new(TreeNode::new(right_node_val)));
+            let right_node = Rc::new(RefCell::new(TreeNode::new(right_node_val)));
             node.borrow_mut().right = Some(Rc::clone(&right_node));
 
             queue.push_back(Rc::clone(&right_node));
@@ -71,8 +68,7 @@ pub fn create_binary_tree(v: Vec<i32>) -> Option<Rc<RefCell<TreeNode>>> {
         let node = queue.pop_front().unwrap();
         let left_node_val = v[i];
         if left_node_val >= 0 {
-            let left_node =
-                Rc::new(RefCell::new(TreeNode::new(left_node_val)));
+            let left_node = Rc::new(RefCell::new(TreeNode::new(left_node_val)));
             node.borrow_mut().left = Some(Rc::clone(&left_node));
 
             queue.push_back(Rc::clone(&left_node));
@@ -84,8 +80,7 @@ pub fn create_binary_tree(v: Vec<i32>) -> Option<Rc<RefCell<TreeNode>>> {
         }
         let right_node_val = v[i];
         if right_node_val >= 0 {
-            let right_node =
-                Rc::new(RefCell::new(TreeNode::new(right_node_val)));
+            let right_node = Rc::new(RefCell::new(TreeNode::new(right_node_val)));
             node.borrow_mut().right = Some(Rc::clone(&right_node));
 
             queue.push_back(Rc::clone(&right_node));
@@ -106,22 +101,28 @@ pub fn tree_to_vec(root: Option<Rc<RefCell<TreeNode>>>) -> Vec<Option<i32>> {
             let node = node.borrow();
             vec.push(Some(node.val));
 
-            if node.left.is_some() || node.right.is_some() {
-                if let Some(ref left_node) = node.left {
-                    queue.push_back(Some(left_node.clone()));
-                } else {
+            if let Some(ref left_node) = node.left {
+                queue.push_back(Some(left_node.clone()));
+            } else {
+                if !queue.is_empty() {
                     queue.push_back(None);
                 }
+            }
 
-                if let Some(ref right_node) = node.right {
-                    queue.push_back(Some(right_node.clone()));
-                } else {
+            if let Some(ref right_node) = node.right {
+                queue.push_back(Some(right_node.clone()));
+            } else {
+                if !queue.is_empty() {
                     queue.push_back(None);
                 }
             }
         } else {
             vec.push(None);
         }
+    }
+
+    while vec.last().as_ref().unwrap().is_none() {
+        vec.pop();
     }
     vec
 }
