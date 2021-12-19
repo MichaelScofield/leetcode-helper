@@ -3,6 +3,7 @@ public class ListNode {
     int val;
     ListNode next;
 
+    @SuppressWarnings("unused")
     ListNode() {
         // empty
     }
@@ -11,12 +12,17 @@ public class ListNode {
         this.val = val;
     }
 
+    @SuppressWarnings("unused")
     ListNode(int val, ListNode next) {
         this.val = val;
         this.next = next;
     }
 
-    static ListNode from(Integer[] vals, Integer cyclePos) {
+    static ListNode from(int[] vals) {
+        return from(vals, null);
+    }
+
+    static ListNode from(int[] vals, @SuppressWarnings("SameParameterValue") Integer cyclePos) {
         ListNode head = null;
         ListNode curr = null;
         ListNode cycleNode = null;

@@ -1,39 +1,43 @@
+import java.util.Comparator;
+import java.util.PriorityQueue;
+
 public class Solution {
 
-    public boolean isMatch(String s, String p) {
-        int m = s == null ? 0 : s.length();
-        int n = p == null ? 0 : p.length();
-
-        boolean[][] dp = new boolean[m + 1][n + 1];
-        dp[0][0] = true;
-
-        for (int j = 1; j <= n; j++) {
-            dp[0][j] = p.charAt(j - 1) == '*' && dp[0][j - 1];
+    public ListNode mergeKLists(ListNode[] lists) {
+        if (lists == null || lists.length == 0) {
+            return null;
         }
 
-        for (int i = 1; i <= m; i++) {
-            for (int j = 1; j <= n; j++) {
-                char cs = s.charAt(i - 1);
-                char cp = p.charAt(j - 1);
-                if (cp == cs || cp == '?') {
-                    dp[i][j] = dp[i - 1][j - 1];
-                } else if (cp == '*') {
-                    dp[i][j] = dp[i - 1][j] || dp[i][j - 1];
-                } else {
-                    dp[i][j] = false;
-                }
+        PriorityQueue<ListNode> minHeap = new PriorityQueue<>(Comparator.comparingInt(o -> o.val));
+        for (ListNode list : lists) {
+            if (list != null) {
+                minHeap.add(list);
             }
         }
-        return dp[m][n];
+
+        ListNode dummyHead = new ListNode();
+        ListNode head = dummyHead;
+        while (!minHeap.isEmpty()) {
+            ListNode minNode = minHeap.poll();
+            ListNode node = new ListNode(minNode.val);
+            dummyHead.next = node;
+            dummyHead = node;
+
+            if (minNode.next != null) {
+                minHeap.add(minNode.next);
+            }
+        }
+        return head.next;
     }
 
     public static void main(String[] args) {
+        ListNode l1 = ListNode.from(new int[]{1, 4, 5});
+        ListNode l2 = ListNode.from(new int[]{1, 3, 4});
+        ListNode l3 = ListNode.from(new int[]{2, 6});
         Solution solution = new Solution();
-
-        System.out.println(!solution.isMatch("aa", "a"));
-        System.out.println(solution.isMatch("aa", "*"));
-        System.out.println(!solution.isMatch("cb", "?a"));
-        System.out.println(solution.isMatch("adceb", "*a*b"));
-        System.out.println(!solution.isMatch("acdcb", "a*c?b"));
+        ListNode merged = solution.mergeKLists(new ListNode[]{l1, l2, l3});
+        ListNode.printList(merged);
+        System.out.println(ListNode.isEqual(
+                ListNode.from(new int[]{1, 1, 2, 3, 4, 4, 5, 6}), merged));
     }
 }
