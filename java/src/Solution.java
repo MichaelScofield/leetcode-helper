@@ -1,43 +1,64 @@
-import java.util.Comparator;
-import java.util.PriorityQueue;
+import java.util.Arrays;
+import java.util.List;
 
 public class Solution {
 
-    public ListNode mergeKLists(ListNode[] lists) {
-        if (lists == null || lists.length == 0) {
+    boolean isValid = true;
+
+    public boolean isValidBST(TreeNode root) {
+        if (root == null) {
+            throw new IllegalStateException("undefined");
+        }
+        inorder(root, null);
+        return isValid;
+    }
+
+    TreeNode inorder(TreeNode node, TreeNode pre) {
+        if (!isValid) {
             return null;
         }
 
-        PriorityQueue<ListNode> minHeap = new PriorityQueue<>(Comparator.comparingInt(o -> o.val));
-        for (ListNode list : lists) {
-            if (list != null) {
-                minHeap.add(list);
+        if (node.left != null) {
+            pre = inorder(node.left, pre);
+        }
+
+        if (pre != null) {
+            if (pre.val >= node.val) {
+                isValid = false;
+                return null;
             }
         }
 
-        ListNode dummyHead = new ListNode();
-        ListNode head = dummyHead;
-        while (!minHeap.isEmpty()) {
-            ListNode minNode = minHeap.poll();
-            ListNode node = new ListNode(minNode.val);
-            dummyHead.next = node;
-            dummyHead = node;
-
-            if (minNode.next != null) {
-                minHeap.add(minNode.next);
-            }
+        if (node.right != null) {
+            return inorder(node.right, node);
+        } else {
+            return node;
         }
-        return head.next;
     }
 
     public static void main(String[] args) {
-        ListNode l1 = ListNode.from(new int[]{1, 4, 5});
-        ListNode l2 = ListNode.from(new int[]{1, 3, 4});
-        ListNode l3 = ListNode.from(new int[]{2, 6});
         Solution solution = new Solution();
-        ListNode merged = solution.mergeKLists(new ListNode[]{l1, l2, l3});
-        ListNode.printList(merged);
-        System.out.println(ListNode.isEqual(
-                ListNode.from(new int[]{1, 1, 2, 3, 4, 4, 5, 6}), merged));
+        List<Integer[]> inputs = Arrays.asList(
+                new Integer[]{2, 1, 3}
+                , new Integer[]{5, 2, 6, 1, 3}
+                , new Integer[]{5, 1, 4, null, null, 3, 6}
+                , new Integer[]{5, 3, 6, 1, 5}
+                , new Integer[]{5, 2, 6, 1, 3, 4, null}
+                , new Integer[]{3, null, 30, 10, null, null, 15, null, 45}
+        );
+        List<Boolean> expects = Arrays.asList(
+                true
+                , true
+                , false
+                , false
+                , false
+                , false
+        );
+        for (int i = 0; i < inputs.size(); i++) {
+            Integer[] vals = inputs.get(i);
+            TreeNode root = TreeNode.createTree(vals);
+            boolean expect = expects.get(i);
+            System.out.println(solution.isValidBST(root) == expect);
+        }
     }
 }
