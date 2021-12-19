@@ -1,75 +1,59 @@
-use crate::helper::def::TreeNode;
-use std::cell::RefCell;
-use std::rc::Rc;
-
 mod helper;
 
 struct Solution;
 
 impl Solution {
-    pub fn recover_tree(root: &mut Option<Rc<RefCell<TreeNode>>>) {
-        assert!(root.is_some());
+    pub fn three_sum_closest(nums: Vec<i32>, target: i32) -> i32 {
+        assert!(nums.len() >= 3);
 
-        fn inorder(
-            node: Option<Rc<RefCell<TreeNode>>>,
-            pre: &mut Option<Rc<RefCell<TreeNode>>>,
-            a: &mut Option<Rc<RefCell<TreeNode>>>,
-            b: &mut Option<Rc<RefCell<TreeNode>>>,
-        ) -> Option<Rc<RefCell<TreeNode>>> {
-            if let Some(node) = node {
-                if let Some(left) = node.borrow().left.as_ref() {
-                    *pre = inorder(Some(Rc::clone(left)), pre, a, b);
+        let nums = &mut { nums };
+        nums.sort();
+
+        let mut closest: i64 = i32::MAX as i64;
+        let target = target as i64;
+        let mut i = 0;
+        while i < nums.len() {
+            if i > 0 && nums[i] == nums[i - 1] {
+                i += 1;
+                continue;
+            }
+
+            let mut j = i + 1;
+            let mut k = nums.len() - 1;
+            while j < k {
+                if j > i + 1 && nums[j] == nums[j - 1] {
+                    j += 1;
+                    continue;
+                }
+                if k < nums.len() - 1 && nums[k] == nums[k + 1] {
+                    k -= 1;
+                    continue;
                 }
 
-                let val = node.borrow().val;
-                if let Some(pre) = pre {
-                    let pre_val = pre.borrow().val;
-                    if val < pre_val {
-                        *b = Some(Rc::clone(&node));
-                        if a.is_none() {
-                            *a = Some(Rc::clone(&pre));
-                        } else {
-                            return None;
-                        }
+                let sum = nums[i] as i64 + nums[j] as i64 + nums[k] as i64;
+                if sum == target {
+                    return sum as i32;
+                } else {
+                    if sum < target {
+                        j += 1;
+                    } else {
+                        k -= 1;
+                    }
+
+                    if (sum - target).abs() < (closest - target).abs() {
+                        closest = sum;
                     }
                 }
-
-                return if let Some(right) = node.borrow().right.as_ref() {
-                    inorder(Some(Rc::clone(right)), &mut Some(Rc::clone(&node)), a, b)
-                } else {
-                    Some(Rc::clone(&node))
-                };
             }
-            None
+            i += 1;
         }
-
-        let mut a = None;
-        let mut b = None;
-
-        let mut pre = None;
-        inorder(root.clone(), &mut pre, &mut a, &mut b);
-
-        let a = a.unwrap();
-        let b = b.unwrap();
-        let t = a.borrow().val;
-        a.borrow_mut().val = b.borrow().val;
-        b.borrow_mut().val = t;
+        closest as i32
     }
 }
 
 fn main() {
-    use helper::util::create_binary_tree;
-    use helper::util::tree_to_vec;
-
-    let mut root = create_binary_tree(vec![2, 1, -1, -1, 3]);
-    Solution::recover_tree(&mut root);
-    println!("{:?}", tree_to_vec(root));
-
-    let mut root = create_binary_tree(vec![1, 3, -1, -1, 2]);
-    Solution::recover_tree(&mut root);
-    println!("{:?}", tree_to_vec(root));
-
-    let mut root = create_binary_tree(vec![3, 1, 4, -1, -1, 2]);
-    Solution::recover_tree(&mut root);
-    println!("{:?}", tree_to_vec(root));
+    assert_eq!(2, Solution::three_sum_closest(vec![-1, 0, 1, 1, 55], 3));
+    assert_eq!(-2, Solution::three_sum_closest(vec![-3, -2, -5, 3, -4], -1));
+    assert_eq!(2, Solution::three_sum_closest(vec![-1, 2, 1, -4], 1));
+    assert_eq!(0, Solution::three_sum_closest(vec![0, 0, 0], 1))
 }
