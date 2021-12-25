@@ -1,5 +1,6 @@
 use std::cell::RefCell;
 use std::collections::VecDeque;
+use std::fmt::Debug;
 use std::rc::Rc;
 
 use super::def::ListNode;
@@ -165,7 +166,7 @@ pub fn list_to_num(node: Option<Box<ListNode>>) -> i32 {
 }
 
 #[allow(dead_code)]
-pub fn print_matrix(matrix: &Vec<Vec<i32>>) {
+pub fn print_matrix<T: Debug>(matrix: &Vec<Vec<T>>) {
     for row in matrix.iter() {
         println!("{:?}", row);
     }
