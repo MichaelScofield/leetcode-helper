@@ -1,64 +1,118 @@
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+
+// Definition for a Node.
+class Node {
+    public int val;
+    public List<Node> neighbors;
+
+    public Node() {
+        val = 0;
+        neighbors = new ArrayList<>();
+    }
+
+    public Node(int _val) {
+        val = _val;
+        neighbors = new ArrayList<>();
+    }
+
+    public Node(int _val, ArrayList<Node> _neighbors) {
+        val = _val;
+        neighbors = _neighbors;
+    }
+}
 
 public class Solution {
 
-    boolean isValid = true;
+    static class NodePair {
+        final Node curr;
+        final Node currNew;
 
-    public boolean isValidBST(TreeNode root) {
-        if (root == null) {
-            throw new IllegalStateException("undefined");
+        NodePair(Node curr, Node currNew) {
+            this.curr = curr;
+            this.currNew = currNew;
         }
-        inorder(root, null);
-        return isValid;
     }
 
-    TreeNode inorder(TreeNode node, TreeNode pre) {
-        if (!isValid) {
+    Map<Integer, Node> nodes = new HashMap<>();
+
+    public Node cloneGraph(Node node) {
+        if (node == null) {
             return null;
         }
+        Node newNode = new Node();
+        LinkedList<NodePair> queue = new LinkedList<>();
+        queue.push(new NodePair(node, newNode));
+        while (!queue.isEmpty()) {
+            NodePair nodePair = queue.pop();
+            Node curr = nodePair.curr;
 
-        if (node.left != null) {
-            pre = inorder(node.left, pre);
-        }
+            List<Node> neighbors = curr.neighbors;
+            ArrayList<Node> newNeighbors = new ArrayList<>(neighbors.size());
+            for (Node neighbor : neighbors) {
+                if (nodes.containsKey(neighbor.val)) {
+                    newNeighbors.add(nodes.get(neighbor.val));
+                } else {
+                    Node newNeighbor = new Node(neighbor.val);
+                    newNeighbors.add(newNeighbor);
 
-        if (pre != null) {
-            if (pre.val >= node.val) {
-                isValid = false;
-                return null;
+                    nodes.put(neighbor.val, newNeighbor);
+                    queue.push(new NodePair(neighbor, newNeighbor));
+                }
             }
-        }
 
-        if (node.right != null) {
-            return inorder(node.right, node);
-        } else {
-            return node;
+            Node currNew = nodePair.currNew;
+            currNew.val = curr.val;
+            currNew.neighbors = newNeighbors;
+            nodes.put(currNew.val, currNew);
         }
+        return newNode;
     }
 
     public static void main(String[] args) {
-        Solution solution = new Solution();
-        List<Integer[]> inputs = Arrays.asList(
-                new Integer[]{2, 1, 3}
-                , new Integer[]{5, 2, 6, 1, 3}
-                , new Integer[]{5, 1, 4, null, null, 3, 6}
-                , new Integer[]{5, 3, 6, 1, 5}
-                , new Integer[]{5, 2, 6, 1, 3, 4, null}
-                , new Integer[]{3, null, 30, 10, null, null, 15, null, 45}
-        );
-        List<Boolean> expects = Arrays.asList(
-                true
-                , true
-                , false
-                , false
-                , false
-                , false
-        );
-        for (int i = 0; i < inputs.size(); i++) {
-            Integer[] vals = inputs.get(i);
-            TreeNode root = TreeNode.createTree(vals);
-            boolean expect = expects.get(i);
-            System.out.println(solution.isValidBST(root) == expect);
+        Solution solution;
+
+        Node n1 = new Node(1);
+        Node n2 = new Node(2);
+        Node n3 = new Node(3);
+        Node n4 = new Node(4);
+        n1.neighbors = Arrays.asList(n2, n4);
+        n2.neighbors = Arrays.asList(n1, n3);
+        n3.neighbors = Arrays.asList(n2, n4);
+        n4.neighbors = Arrays.asList(n1, n3);
+        print(n1);
+        solution = new Solution();
+        Node newN1 = solution.cloneGraph(n1);
+        print(newN1);
+
+        Node n5 = new Node(1);
+        print(n5);
+        solution = new Solution();
+        Node newN5 = solution.cloneGraph(n5);
+        print(newN5);
+
+        Node n6 = new Node(1);
+        Node n7 = new Node(2);
+        n6.neighbors = List.of(n7);
+        n7.neighbors = List.of(n6);
+        print(n6);
+        solution = new Solution();
+        Node newN6 = solution.cloneGraph(n6);
+        print(newN6);
+    }
+
+    static void print(Node node) {
+        LinkedList<Node> queue = new LinkedList<>();
+        queue.push(node);
+        Set<Integer> is_printed = new HashSet<>();
+        while (!queue.isEmpty()) {
+            Node n = queue.pop();
+            if (!is_printed.add(n.val)) {
+                continue;
+            }
+            System.out.println(n.val + " -> " + Arrays.toString(
+                    n.neighbors.stream().map(x -> x.val).toArray()));
+            queue.addAll(n.neighbors);
         }
+        System.out.println();
     }
 }
