@@ -3,47 +3,52 @@ mod helper;
 struct Solution;
 
 impl Solution {
-    pub fn min_cut(s: String) -> i32 {
-        assert!(s.len() >= 1);
-
-        let s = s.as_bytes();
-        let n = s.len();
-        let mut palindromes = vec![vec![false; n]; n];
-        for i in 0..n {
-            palindromes[i][i] = true;
-        }
-        for i in (0..n).rev() {
-            for j in i + 1..n {
-                if j - i == 1 {
-                    palindromes[i][j] = s[i] == s[j];
-                } else {
-                    palindromes[i][j] = palindromes[i + 1][j - 1] && (s[i] == s[j]);
-                }
+    pub fn compare_version(version1: String, version2: String) -> i32 {
+        let version1: Vec<&str> = version1.split(".").collect();
+        let version2: Vec<&str> = version2.split(".").collect();
+        let mut i = 0;
+        let mut j = 0;
+        while i < version1.len() || j < version2.len() {
+            let v1 = version1
+                .get(i)
+                .map(|x| x.parse::<i32>().unwrap())
+                .unwrap_or(0);
+            let v2 = version2
+                .get(j)
+                .map(|x| x.parse::<i32>().unwrap())
+                .unwrap_or(0);
+            if v1 < v2 {
+                return -1;
             }
-        }
-
-        let mut dp = vec![n; n];
-        dp[0] = 0;
-        for i in 1..n {
-            for p in 0..=i {
-                if palindromes[p][i] {
-                    if p == 0 {
-                        dp[i] = 0;
-                        break;
-                    } else {
-                        dp[i] = std::cmp::min(dp[p - 1] + 1, dp[i]);
-                    }
-                }
+            if v1 > v2 {
+                return 1;
             }
+            i += 1;
+            j += 1;
         }
-        dp[n - 1] as i32
+        0
     }
 }
 
 fn main() {
-    assert_eq!(1, Solution::min_cut("aaba".to_string()));
-    assert_eq!(0, Solution::min_cut("aabaa".to_string()));
-    assert_eq!(1, Solution::min_cut("aab".to_string()));
-    assert_eq!(0, Solution::min_cut("a".to_string()));
-    assert_eq!(1, Solution::min_cut("ab".to_string()));
+    assert_eq!(
+        0,
+        Solution::compare_version("1.01".to_string(), "1.001".to_string())
+    );
+    assert_eq!(
+        0,
+        Solution::compare_version("1.0".to_string(), "1.0.0".to_string())
+    );
+    assert_eq!(
+        -1,
+        Solution::compare_version("0.1".to_string(), "1.1".to_string())
+    );
+    assert_eq!(
+        1,
+        Solution::compare_version("1.0.1".to_string(), "1".to_string())
+    );
+    assert_eq!(
+        -1,
+        Solution::compare_version("7.5.2.4".to_string(), "7.5.3".to_string())
+    );
 }
