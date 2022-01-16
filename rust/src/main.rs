@@ -1,82 +1,41 @@
 mod helper;
 
-#[derive(Default)]
-struct Trie {
-    children: [Option<Box<Trie>>; 26],
-    is_word_ending: bool,
-}
+struct Solution;
 
-impl Trie {
-    fn new() -> Self {
-        Default::default()
-    }
-
-    fn insert(&mut self, word: String) {
-        assert!(word.len() >= 1);
-
-        let mut trie = self;
-        for ch in word.chars() {
-            trie = trie.children[(ch as usize - 'a' as usize)]
-                .get_or_insert_with(|| Box::new(Trie::new()));
-        }
-        trie.is_word_ending = true
-    }
-
-    fn search(&self, word: String) -> bool {
-        assert!(word.len() >= 1);
-
-        if let Some(trie) = self.search0(word) {
-            trie.is_word_ending
-        } else {
-            false
-        }
-    }
-
-    fn starts_with(&self, prefix: String) -> bool {
-        assert!(prefix.len() >= 1);
-
-        self.search0(prefix).is_some()
-    }
-
-    fn search0(&self, word: String) -> Option<&Trie> {
-        assert!(word.len() >= 1);
-
-        let mut trie = self;
-        for ch in word.chars() {
-            if let Some(x) = trie.children[(ch as usize - 'a' as usize)].as_ref() {
-                trie = x;
+impl Solution {
+    pub fn min_sub_array_len(target: i32, nums: Vec<i32>) -> i32 {
+        assert!(nums.len() >= 1);
+        let mut min_len = i32::MAX;
+        let mut l = 0;
+        let mut r = 0;
+        let mut sum = nums[0];
+        loop {
+            if sum >= target {
+                min_len = std::cmp::min((r - l + 1) as i32, min_len);
+                sum -= nums[l];
+                l += 1;
             } else {
-                return None;
+                r += 1;
+                if r == nums.len() {
+                    break;
+                }
+                sum += nums[r];
             }
         }
-        Some(trie)
+        if min_len == i32::MAX {
+            0
+        } else {
+            min_len
+        }
     }
 }
 
 fn main() {
-    let mut trie = Trie::new();
-    trie.insert("app".to_string());
-    trie.insert("apple".to_string());
-    trie.insert("beer".to_string());
-    trie.insert("add".to_string());
-    trie.insert("jam".to_string());
-    trie.insert("rental".to_string());
-    assert!(!trie.search("apps".to_string()));
-    assert!(trie.search("app".to_string()));
-    assert!(!trie.search("ad".to_string()));
-    assert!(!trie.search("applepie".to_string()));
-    assert!(!trie.search("rest".to_string()));
-    assert!(!trie.search("jan".to_string()));
-    assert!(!trie.search("rent".to_string()));
-    assert!(trie.search("beer".to_string()));
-    assert!(trie.search("jam".to_string()));
-    assert!(!trie.starts_with("apps".to_string()));
-    assert!(trie.starts_with("app".to_string()));
-    assert!(trie.starts_with("ad".to_string()));
-    assert!(!trie.starts_with("applepie".to_string()));
-    assert!(!trie.starts_with("rest".to_string()));
-    assert!(!trie.starts_with("jan".to_string()));
-    assert!(trie.starts_with("rent".to_string()));
-    assert!(trie.starts_with("beer".to_string()));
-    assert!(trie.starts_with("jam".to_string()));
+    assert_eq!(1, Solution::min_sub_array_len(1, vec![1]));
+    assert_eq!(2, Solution::min_sub_array_len(7, vec![2, 3, 1, 2, 4, 3]));
+    assert_eq!(1, Solution::min_sub_array_len(4, vec![1, 4, 4]));
+    assert_eq!(
+        0,
+        Solution::min_sub_array_len(11, vec![1, 1, 1, 1, 1, 1, 1, 1])
+    );
 }
